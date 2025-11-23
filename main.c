@@ -1,7 +1,9 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
+
 
 // Pins
 #define PIN_MISO 12
@@ -22,81 +24,26 @@
 #define OFFSET 8
 #define NUM_CUBES 6
 
+// Packed dice data from dice.c (60x60 -> 480 bytes)
+extern const uint8_t dice6_bytes[480];
+
 // Dice Bitmaps
-uint8_t dice_1[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_2[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_3[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_4[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_5[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_6[CUBE_SIZE][CUBE_SIZE];
-uint8_t dice_outline[CUBE_SIZE][CUBE_SIZE];
+
+//uint8_t dice_1[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_2[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_3[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_4[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_5[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_6[CUBE_SIZE][CUBE_SIZE];
+//uint8_t dice_outline[CUBE_SIZE][CUBE_SIZE];
 
 spi_inst_t *SPI_PORT = spi1;
 
-// Define Dice outline Bitmap -> 1 = white, 0 = empty
-void init_dice_outline() { 
-  for(int y=0;y<CUBE_SIZE;y++){ 
-    for(int x=0;x<CUBE_SIZE;x++){ 
-      if(x==0 || x==CUBE_SIZE-1 || y==0 || y==CUBE_SIZE-1) 
-        dice_outline[y][x] = 1; // edge 
-      else dice_outline[y][x] = 0; // inside empty 
-    } 
-  } 
-}
-
-// Define Dice Number Bitmaps
-void init_dice_points() {
-    // Set everything to 0
-    uint8_t* dice_array[6] = { (uint8_t*)dice_1, (uint8_t*)dice_2, (uint8_t*)dice_3,
-                               (uint8_t*)dice_4, (uint8_t*)dice_5, (uint8_t*)dice_6 };
-
-    for(int k=0;k<6;k++){
-        for(int y=0;y<CUBE_SIZE;y++)
-            for(int x=0;x<CUBE_SIZE;x++)
-                dice_array[k][y*CUBE_SIZE+x] = 0;
-    }
-
-    // Set rasterized point -> change here to set the points to other positions
-    void set_point(uint8_t d[CUBE_SIZE][CUBE_SIZE], int rx, int ry) {
-      int px = OFFSET + rx*OFFSET*2;
-      int py = OFFSET + ry*OFFSET*2;
-      for(int y=0;y<POINT_SIZE;y++)
-          for(int x=0;x<POINT_SIZE;x++)
-              d[py+y][px+x] = 1;
-    }
-
-    // Dice 1
-    set_point(dice_1, 1, 1);
-
-    // Dice 2
-    set_point(dice_2, 0,0);
-    set_point(dice_2, 2,2);
-
-    // Dice 3
-    set_point(dice_3,0,0);
-    set_point(dice_3,1,1);
-    set_point(dice_3,2,2);
-
-    // Dice 4
-    set_point(dice_4,0,0);
-    set_point(dice_4,2,0);
-    set_point(dice_4,0,2);
-    set_point(dice_4,2,2);
-
-    // Dice 5
-    set_point(dice_5,1,1);
-    set_point(dice_5,0,0);
-    set_point(dice_5,2,0);
-    set_point(dice_5,0,2);
-    set_point(dice_5,2,2);
-
-    // Dice 6
-    set_point(dice_6,0,0);
-    set_point(dice_6,0,1);
-    set_point(dice_6,0,2);
-    set_point(dice_6,2,0);
-    set_point(dice_6,2,1);
-    set_point(dice_6,2,2);
+// helper: clear bitmap
+static void clear_bitmap(uint8_t bm[CUBE_SIZE][CUBE_SIZE]) {
+    for (int y = 0; y < CUBE_SIZE; y++)
+        for (int x = 0; x < CUBE_SIZE; x++)
+            bm[y][x] = 0;
 }
 
 // Set window to draw in
@@ -136,41 +83,49 @@ void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
     // ready to draw
 }
 
+// Fill a horizontal span of `len` pixels at (x,y) with `color` in one SPI transfer.
+void tft_fill_color_span(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
+    if (len == 0) return;
+    tft_set_window(x, y, x + len - 1, y);
 
-void tft_draw_pixel(uint16_t x, uint16_t y, uint16_t color) {
-    tft_set_window(x, y, x, y);
-
-    uint8_t data[2];
-    data[0] = color >> 8;    // High Byte
-    data[1] = color & 0xFF;  // Low Byte
+    uint8_t buf[CUBE_SIZE * 2]; // max needed: CUBE_SIZE pixels * 2 bytes per pixel
+    uint8_t hi = color >> 8;
+    uint8_t lo = color & 0xFF;
+    for (int i = 0; i < len; i++) {
+        buf[2 * i] = hi;
+        buf[2 * i + 1] = lo;
+    }
 
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 1); // Data
-    spi_write_blocking(SPI_PORT, data, 2);
+    spi_write_blocking(SPI_PORT, buf, len * 2);
     gpio_put(PIN_CS, 1);
 }
 
-void tft_fill_rect(uint16_t x, uint16_t y, uint16_t w, uint16_t h, uint16_t color) {
-    tft_set_window(x, y, x + w - 1, y + h - 1);
-
-    uint16_t i, pixels = w * h;
-    uint8_t data[2] = { color >> 8, color & 0xFF };
-
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 1);
-
-    for (i = 0; i < pixels; i++) {
-        spi_write_blocking(SPI_PORT, data, 2);
-    }
-
-    gpio_put(PIN_CS, 1);
-}
-
-void draw_bitmap(uint16_t x0, uint16_t y0, uint8_t bitmap[CUBE_SIZE][CUBE_SIZE], uint16_t color) {
-    for(int y=0;y<CUBE_SIZE;y++){
-        for(int x=0;x<CUBE_SIZE;x++){
-            if(bitmap[y][x])
-                tft_fill_rect(x0+x, y0+y, 1,1,color);
+// draw_packed_bitmap: for each row, write contiguous runs of '1' pixels as spans.
+static void draw_packed_bitmap(uint16_t x0, uint16_t y0, const uint8_t *data, uint16_t color) {
+    const int bytes_per_row = (CUBE_SIZE + 7) / 8;
+    for (int y = 0; y < CUBE_SIZE; y++) {
+        int x = 0;
+        while (x < CUBE_SIZE) {
+            // skip zeros
+            while (x < CUBE_SIZE) {
+                int idx = y * bytes_per_row + (x / 8);
+                int bit = 7 - (x & 7);
+                if ((data[idx] >> bit) & 1) break;
+                x++;
+            }
+            if (x >= CUBE_SIZE) break;
+            int start = x;
+            // find run of ones
+            while (x < CUBE_SIZE) {
+                int idx = y * bytes_per_row + (x / 8);
+                int bit = 7 - (x & 7);
+                if (!((data[idx] >> bit) & 1)) break;
+                x++;
+            }
+            int len = x - start;
+            tft_fill_color_span(x0 + start, y0 + y, (uint16_t)len, color);
         }
     }
 }
@@ -207,43 +162,21 @@ int main() {
     cmd = 0x29; spi_write_blocking(SPI_PORT, &cmd, 1);
     gpio_put(PIN_CS, 1);
 
-
-
     // Cubes
-
-    // Init Bitmaps
-    init_dice_outline();
-    init_dice_points();
-
     uint16_t cx = SCREEN_W/2;
     uint16_t cy = SCREEN_H/2;
 
-    // Draw Cubes with each number
-    for(int i=0;i<NUM_CUBES;i++){
-      float theta = 2*M_PI * i / NUM_CUBES;
-      float x = cx + RADIUS * cosf(theta);
-      float y = cy + RADIUS * sinf(theta);
+    // Draw dice in a concentric radial pattern
+    for (int i = 0; i < NUM_CUBES; i++) {
+        float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+        float x = cx + RADIUS * cosf(theta);
+        float y = cy + RADIUS * sinf(theta);
 
-      uint16_t draw_x = (uint16_t)(x - CUBE_SIZE/2); // Center cubes
-      uint16_t draw_y = (uint16_t)(y - CUBE_SIZE/2);
+        uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+        uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
-      // random number 1-6 (e.g. fixed for test)
-      int dice_num = i % 6 + 1;
-
-      // Select bitmap
-      uint8_t (*dice_bitmap)[CUBE_SIZE];
-      switch(dice_num){
-          case 1: dice_bitmap = dice_1; break;
-          case 2: dice_bitmap = dice_2; break;
-          case 3: dice_bitmap = dice_3; break;
-          case 4: dice_bitmap = dice_4; break;
-          case 5: dice_bitmap = dice_5; break;
-          case 6: dice_bitmap = dice_6; break;
-      }
-
-      // Draw outline + points
-      draw_bitmap(draw_x, draw_y, dice_outline, 0xFFFF);
-      draw_bitmap(draw_x, draw_y, dice_bitmap, 0xFFFF);   
+        // draw packed bitmap (use white color)
+        draw_packed_bitmap(draw_x, draw_y, dice6_bytes, 0xFFFF);
     }
 
     while (true) { tight_loop_contents(); }
