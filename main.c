@@ -24,18 +24,18 @@
 #define OFFSET 8
 #define NUM_CUBES 6
 
-// Packed dice data from dice.c (60x60 -> 480 bytes)
+// Bitmap dice data
+extern const uint8_t dice1_bytes[480];
+extern const uint8_t dice2_bytes[480];
+extern const uint8_t dice3_bytes[480];
+extern const uint8_t dice4_bytes[480];
+extern const uint8_t dice5_bytes[480];
 extern const uint8_t dice6_bytes[480];
 
-// Dice Bitmaps
-
-//uint8_t dice_1[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_2[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_3[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_4[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_5[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_6[CUBE_SIZE][CUBE_SIZE];
-//uint8_t dice_outline[CUBE_SIZE][CUBE_SIZE];
+static const uint8_t *dice_arr[NUM_CUBES] = {
+    dice1_bytes, dice2_bytes, dice3_bytes,
+    dice4_bytes, dice5_bytes, dice6_bytes
+};
 
 spi_inst_t *SPI_PORT = spi1;
 
@@ -176,7 +176,7 @@ int main() {
         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
         // draw packed bitmap (use white color)
-        draw_packed_bitmap(draw_x, draw_y, dice6_bytes, 0xFFFF);
+        draw_packed_bitmap(draw_x, draw_y, dice_arr[i % NUM_CUBES], 0xFFFF);
     }
 
     while (true) { tight_loop_contents(); }
