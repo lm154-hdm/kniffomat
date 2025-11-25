@@ -1,6 +1,5 @@
 #include "helpers.h"
-#include <stdio.h>
-#include "hardware/spi.h"
+#include <stdlib.h>
 #include "pico/stdlib.h"
 
 #define PIN_MISO 12
