@@ -11,7 +11,7 @@ int main(void) {
 
     while (true) {
         printf("Looping...\n");
-        sleep_ms(1000);
+        sleep_ms(2000);
     }
 
     return 0;
