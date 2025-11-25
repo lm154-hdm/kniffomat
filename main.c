@@ -50,7 +50,7 @@ int main() {
     gpio_set_function(10, GPIO_FUNC_SPI); // SCK
     gpio_set_function(11, GPIO_FUNC_SPI); // MOSI
 
-    // Steuerpins
+    // Pins
     gpio_init(PIN_CS);
     gpio_init(PIN_DC);
     gpio_init(PIN_RST);
@@ -79,7 +79,21 @@ int main() {
     uint16_t cx = SCREEN_W/2;
     uint16_t cy = SCREEN_H/2;
 
-    // Draw dice in a concentric radial pattern
+    // Roll 6 dice using seeded randomness
+    // true randomness is not possible but can be noise detected from unused pins
+    // adc_read()
+    uint8_t rolled[NUM_CUBES];
+    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
+    for (int i = 0; i < NUM_CUBES; i++) {
+        seed = seed * 1664525 + 1013904223;
+        rolled[i] = (seed % 6) + 1; // 1-6
+    }
+    printf("Rolled dice: ");
+    for (int i = 0; i < NUM_CUBES; i++) {
+        printf("%d ", rolled[i]);
+    }
+
+    // Draw the rolled dice in a concentric radial pattern
     for (int i = 0; i < NUM_CUBES; i++) {
         float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
         float x = cx + RADIUS * cosf(theta);
@@ -88,8 +102,7 @@ int main() {
         uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
-        // draw packed bitmap
-        draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[i % NUM_CUBES], CUBE_SIZE, 0xFFFF);
+        draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
     }
 
     while (true) { tight_loop_contents(); }
