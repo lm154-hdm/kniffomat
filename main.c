@@ -1,9 +1,12 @@
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 #include <stdint.h>
 #include "pico/stdlib.h"
 #include "hardware/spi.h"
 
+// Constants
+#define M_PI 3.14159265358979323846
 
 // Pins
 #define PIN_MISO 12
@@ -40,10 +43,12 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
 spi_inst_t *SPI_PORT = spi1;
 
 // helper: clear bitmap
-static void clear_bitmap(uint8_t bm[CUBE_SIZE][CUBE_SIZE]) {
-    for (int y = 0; y < CUBE_SIZE; y++)
-        for (int x = 0; x < CUBE_SIZE; x++)
-            bm[y][x] = 0;
+static void clear_bitmap(uint8_t *bm, int cube_size) {
+    for (int y = 0; y < cube_size; y++) {
+        for (int x = 0; x < cube_size; x++) {
+            bm[y * cube_size + x] = 0;
+        }
+    }
 }
 
 // Set window to draw in
@@ -83,51 +88,42 @@ void tft_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
     // ready to draw
 }
 
-// Fill a horizontal span of `len` pixels at (x,y) with `color` in one SPI transfer.
-void tft_fill_color_span(uint16_t x, uint16_t y, uint16_t len, uint16_t color) {
-    if (len == 0) return;
-    tft_set_window(x, y, x + len - 1, y);
+// draw_packed_bitmap: for each row, write pixels as spans.
+static void draw_packed_bitmap(uint16_t x0, uint16_t y0, const uint8_t *data, int cube_size, uint16_t color) {
+    int w = cube_size;
+    int h = cube_size;
+    int bytes_per_row = (w + 7) / 8;
+    uint8_t col_hi = (color >> 8) & 0xFF;
+    uint8_t col_lo = color & 0xFF;
 
-    uint8_t buf[CUBE_SIZE * 2]; // max needed: CUBE_SIZE pixels * 2 bytes per pixel
-    uint8_t hi = color >> 8;
-    uint8_t lo = color & 0xFF;
-    for (int i = 0; i < len; i++) {
-        buf[2 * i] = hi;
-        buf[2 * i + 1] = lo;
-    }
+    tft_set_window(x0, y0, x0 + w - 1, y0 + h - 1);
 
     gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 1); // Data
-    spi_write_blocking(SPI_PORT, buf, len * 2);
-    gpio_put(PIN_CS, 1);
-}
+    gpio_put(PIN_DC, 0); spi_write_blocking(SPI_PORT, (uint8_t[]){0x2C}, 1); // RAMWR
+    gpio_put(PIN_DC, 1);
 
-// draw_packed_bitmap: for each row, write contiguous runs of '1' pixels as spans.
-static void draw_packed_bitmap(uint16_t x0, uint16_t y0, const uint8_t *data, uint16_t color) {
-    const int bytes_per_row = (CUBE_SIZE + 7) / 8;
-    for (int y = 0; y < CUBE_SIZE; y++) {
-        int x = 0;
-        while (x < CUBE_SIZE) {
-            // skip zeros
-            while (x < CUBE_SIZE) {
-                int idx = y * bytes_per_row + (x / 8);
-                int bit = 7 - (x & 7);
-                if ((data[idx] >> bit) & 1) break;
-                x++;
+    uint8_t *rowbuf = malloc(2 * cube_size);
+    for (int ry = 0; ry < h; ry++) {
+        const uint8_t *row_src = data + ry * bytes_per_row;
+        int bx = 0;
+        for (int byte_i = 0; byte_i < bytes_per_row; byte_i++) {
+            uint8_t b = row_src[byte_i];
+            for (int bit = 7; bit >= 0; bit--) {
+                if (bx >= w) break;
+                if (b & (1 << bit)) {
+                    rowbuf[bx * 2]     = col_hi;
+                    rowbuf[bx * 2 + 1] = col_lo;
+                } else {
+                    rowbuf[bx * 2]     = 0x00;
+                    rowbuf[bx * 2 + 1] = 0x00;
+                }
+                bx++;
             }
-            if (x >= CUBE_SIZE) break;
-            int start = x;
-            // find run of ones
-            while (x < CUBE_SIZE) {
-                int idx = y * bytes_per_row + (x / 8);
-                int bit = 7 - (x & 7);
-                if (!((data[idx] >> bit) & 1)) break;
-                x++;
-            }
-            int len = x - start;
-            tft_fill_color_span(x0 + start, y0 + y, (uint16_t)len, color);
         }
+        spi_write_blocking(SPI_PORT, rowbuf, w * 2);
     }
+    gpio_put(PIN_CS, 1);
+    free(rowbuf);
 }
 
 
@@ -175,8 +171,8 @@ int main() {
         uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
-        // draw packed bitmap (use white color)
-        draw_packed_bitmap(draw_x, draw_y, dice_arr[i % NUM_CUBES], 0xFFFF);
+        // draw packed bitmap
+        draw_packed_bitmap(draw_x, draw_y, dice_arr[i % NUM_CUBES], CUBE_SIZE, 0xFFFF);
     }
 
     while (true) { tight_loop_contents(); }
