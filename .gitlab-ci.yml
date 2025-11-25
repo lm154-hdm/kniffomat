@@ -1,0 +1,35 @@
+image: registry.mi.hdm-stuttgart.de/embedded/ws25/kniffel
+
+variables:
+  GIT_SUBMODULE_STRATEGY: recursive # Wichtig! Das Pico SDK nutzt Submodule
+  PICO_BOARD: pico2                 # WICHTIG: Target für Pico 2 setzen
+  BUILD_TYPE: RelWithDebInfo
+
+stages:
+  - lint
+  - build
+
+# --- Stage 1: Code Qualität ---
+linting:
+  stage: lint
+  script:
+    # Prüft Formatierung (optional: Fail bei Abweichung)
+    - find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror
+    # Statische Analyse
+    - cppcheck --enable=all --inconclusive --error-exitcode=1 src/
+
+# --- Stage 2: Kompilieren ---
+build_firmware:
+  stage: build
+  script:
+    - mkdir build
+    - cd build
+    # CMake Konfiguration für Pico 2
+    - cmake -DPICO_BOARD=$PICO_BOARD -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
+    - make -j$(nproc)
+  artifacts:
+    paths:
+      - build/*.uf2
+      - build/*.elf
+      - build/*.map
+    expire_in: 1 week
