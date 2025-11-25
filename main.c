@@ -38,6 +38,7 @@ extern const uint8_t dice3_bytes[480];
 extern const uint8_t dice4_bytes[480];
 extern const uint8_t dice5_bytes[480];
 extern const uint8_t dice6_bytes[480];
+extern const uint8_t dice_clear_bytes[480];
 
 static const uint8_t *dice_arr[NUM_CUBES] = {
     dice1_bytes, dice2_bytes, dice3_bytes,
@@ -79,11 +80,43 @@ int main() {
     uint16_t cx = SCREEN_W/2;
     uint16_t cy = SCREEN_H/2;
 
+    // Animation
+    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
+    uint8_t anim[NUM_CUBES];
+    for (int t = 0; t < 4; t++) {
+        // Generate random dice for animation
+        for (int i = 0; i < NUM_CUBES; i++) {
+            seed = seed * 1664525 + 17;
+            anim[i] = (seed % 6) + 1; // 1-6
+        }
+        // Draw the random dice
+        for (int i = 0; i < NUM_CUBES; i++) {
+            float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+            float x = cx + RADIUS * cosf(theta);
+            float y = cy + RADIUS * sinf(theta);
+
+            uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+            uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+
+            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE, 0xFFFF);
+        }
+        sleep_ms(1000);
+        for (int i = 0; i < NUM_CUBES; i++) {
+            float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+            float x = cx + RADIUS * cosf(theta);
+            float y = cy + RADIUS * sinf(theta);
+
+            uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+            uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
+        }
+        sleep_ms(500);
+    }
+
     // Roll 6 dice using seeded randomness
     // true randomness is not possible but can be noise detected from unused pins
     // adc_read()
     uint8_t rolled[NUM_CUBES];
-    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
     for (int i = 0; i < NUM_CUBES; i++) {
         seed = seed * 1664525 + 1013904223;
         rolled[i] = (seed % 6) + 1; // 1-6

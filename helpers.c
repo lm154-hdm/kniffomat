@@ -80,3 +80,34 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
     free(rowbuf);
     gpio_put(PIN_CS, 1);
 }
+
+void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data, 
+                        int cube_size, uint16_t color) {
+    int w = cube_size;
+    int h = cube_size;
+    int bytes_per_row = (w + 7) / 8;
+    uint8_t col_hi = (color >> 8) & 0xFF;
+    uint8_t col_lo = color & 0xFF;
+    tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0); spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1); // RAMWR
+    gpio_put(PIN_DC, 1);
+    uint8_t *rowbuf = malloc(2 * w);
+    if (!rowbuf) return;
+    for (int ry = 0; ry < h; ry++) {
+        const uint8_t *row_src = data + ry * bytes_per_row;
+        int bx = 0;
+        for (int byte_i = 0; byte_i < bytes_per_row; byte_i++) {
+            uint8_t b = row_src[byte_i];
+            for (int bit = 7; bit >= 0; bit--) {
+                if (bx >= w) break;
+                rowbuf[bx * 2]     = b;
+                rowbuf[bx * 2 + 1] = b;
+                bx++;
+            }
+        }
+        spi_write_blocking(spi_port, rowbuf, w * 2);
+    }
+    free(rowbuf);
+    gpio_put(PIN_CS, 1);
+}
