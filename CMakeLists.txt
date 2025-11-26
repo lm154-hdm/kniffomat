@@ -23,7 +23,7 @@ if (EXISTS ${picoVscode})
     include(${picoVscode})
 endif()
 # ====================================================================================
-set(PICO_BOARD pico CACHE STRING "Board type")
+set(PICO_BOARD pico2 CACHE STRING "Board type")
 
 # Pull in Raspberry Pi Pico SDK (must be before project)
 include(pico_sdk_import.cmake)
@@ -35,32 +35,25 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Kniffel main.c )
-
-pico_set_program_name(Kniffel "Kniffel")
-pico_set_program_version(Kniffel "0.1")
-
-# Generate PIO header
-pico_generate_pio_header(Kniffel ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
-
-# Modify the below lines to enable/disable output over UART/USB
-pico_enable_stdio_uart(Kniffel 0)
-pico_enable_stdio_usb(Kniffel 0)
-# Add the standard library to the build
-target_link_libraries(Kniffel
-        pico_stdlib)
-
-# Add the standard include files to the build
-target_include_directories(Kniffel PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+add_executable(Kniffel 
+    main.c 
+    helpers.c
+    dice.c
 )
 
-# Add any user requested libraries
-target_link_libraries(Kniffel 
+# pull in common dependencies
+target_link_libraries(Kniffel pico_stdlib
         hardware_spi
         hardware_i2c
         hardware_pio
         hardware_timer
-        )
+)
 
+if (PICO_CYW43_SUPPORTED)
+    target_link_libraries(Kniffel pico_cyw43_arch_none)
+endif()
+
+# create map/bin/hex file etc.
 pico_add_extra_outputs(Kniffel)
+
+# add url via pico_set_program_url
