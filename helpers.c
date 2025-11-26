@@ -9,12 +9,46 @@
 #define PIN_DC   14
 #define PIN_RST  15
 
-void clear_bitmap(uint8_t *bm, int cube_size) {
-    for (int y = 0; y < cube_size; y++) {
-        for (int x = 0; x < cube_size; x++) {
-            bm[y * cube_size + x] = 0;
-        }
+// helper: send command/data to GC9A01
+static void lcd_cmd(uint8_t c) {
+    gpio_put(PIN_DC, 0);
+    gpio_put(PIN_CS, 0);
+    spi_write_blocking(SPI_PORT, &c, 1);
+    gpio_put(PIN_CS, 1);
+}
+static void lcd_data(const uint8_t *d, size_t len) {
+    gpio_put(PIN_DC, 1);
+    gpio_put(PIN_CS, 0);
+    spi_write_blocking(SPI_PORT, d, len);
+    gpio_put(PIN_CS, 1);
+}
+
+static void lcd_send16(const uint16_t *pixels, size_t count) {
+    // pixels are RGB565 (big-endian: high then low byte)
+    gpio_put(PIN_DC, 1);
+    gpio_put(PIN_CS, 0);
+    // send as bytes, convert on the fly
+    for (size_t i = 0; i < count; ++i) {
+        uint8_t hi = (pixels[i] >> 8) & 0xFF;
+        uint8_t lo = pixels[i] & 0xFF;
+        uint8_t b[2] = { hi, lo };
+        spi_write_blocking(SPI_PORT, b, 2);
     }
+    gpio_put(PIN_CS, 1);
+}
+
+static void set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    uint8_t buf[4];
+    // Column address
+    buf[0] = x0 >> 8; buf[1] = x0 & 0xFF;
+    buf[2] = x1 >> 8; buf[3] = x1 & 0xFF;
+    lcd_cmd(0x2A); lcd_data(buf, 4);
+    // Row address
+    buf[0] = y0 >> 8; buf[1] = y0 & 0xFF;
+    buf[2] = y1 >> 8; buf[3] = y1 & 0xFF;
+    lcd_cmd(0x2B); lcd_data(buf, 4);
+    // Memory write next
+    lcd_cmd(0x2C);
 }
 
 void tft_set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
@@ -50,14 +84,11 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
-    uint8_t col_hi = (color >> 8) & 0xFF;
-    uint8_t col_lo = color & 0xFF;
-    tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0); spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1); // RAMWR
-    gpio_put(PIN_DC, 1);
-    uint8_t *rowbuf = malloc(2 * w);
-    if (!rowbuf) return;
+    // Use set_window + lcd_send16 for GC9A01
+    uint16_t *rowpix = malloc(sizeof(uint16_t) * w);
+    if (!rowpix) return;
+    // set full window once for the entire bitmap
+    set_window(x0, y0, x0 + w - 1, y0 + h - 1);
     for (int ry = 0; ry < h; ry++) {
         const uint8_t *row_src = data + ry * bytes_per_row;
         int bx = 0;
@@ -66,19 +97,17 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
             for (int bit = 7; bit >= 0; bit--) {
                 if (bx >= w) break;
                 if (b & (1 << bit)) {
-                    rowbuf[bx * 2]     = col_hi;
-                    rowbuf[bx * 2 + 1] = col_lo;
+                    rowpix[bx] = color;
                 } else {
-                    rowbuf[bx * 2]     = 0x00;
-                    rowbuf[bx * 2 + 1] = 0x00;
+                    rowpix[bx] = 0x0000;
                 }
                 bx++;
             }
         }
-        spi_write_blocking(spi_port, rowbuf, w * 2);
+        // push this row of pixels
+        lcd_send16(rowpix, w);
     }
-    free(rowbuf);
-    gpio_put(PIN_CS, 1);
+    free(rowpix);
 }
 
 void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data, 
@@ -86,14 +115,11 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
-    uint8_t col_hi = (color >> 8) & 0xFF;
-    uint8_t col_lo = color & 0xFF;
-    tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0); spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1); // RAMWR
-    gpio_put(PIN_DC, 1);
-    uint8_t *rowbuf = malloc(2 * w);
-    if (!rowbuf) return;
+    // Use set_window + lcd_send16 for GC9A01
+    uint16_t *rowpix = malloc(sizeof(uint16_t) * w);
+    if (!rowpix) return;
+    // set full window once for the entire bitmap
+    set_window(x0, y0, x0 + w - 1, y0 + h - 1);
     for (int ry = 0; ry < h; ry++) {
         const uint8_t *row_src = data + ry * bytes_per_row;
         int bx = 0;
@@ -101,13 +127,14 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
             uint8_t b = row_src[byte_i];
             for (int bit = 7; bit >= 0; bit--) {
                 if (bx >= w) break;
-                rowbuf[bx * 2]     = b;
-                rowbuf[bx * 2 + 1] = b;
+                // original artifact code sent the same byte for both color bytes
+                // map that to a 16-bit pixel value: high=b, low=b
+                rowpix[bx] = ((uint16_t)b << 8) | (uint16_t)b;
                 bx++;
             }
         }
-        spi_write_blocking(spi_port, rowbuf, w * 2);
+        // push this row of pixels
+        lcd_send16(rowpix, w);
     }
-    free(rowbuf);
-    gpio_put(PIN_CS, 1);
+    free(rowpix);
 }

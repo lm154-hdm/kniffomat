@@ -45,6 +45,42 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
     dice4_bytes, dice5_bytes, dice6_bytes
 };
 
+// GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
+static void init_gc9a01() {
+    // SPI setup: start slow for init
+    spi_set_format(SPI_PORT, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+    spi_set_baudrate(SPI_PORT, 2000000); // 2 MHz for init
+
+    // Reset sequence
+    gpio_put(PIN_RST, 0); sleep_ms(50);
+    gpio_put(PIN_RST, 1); sleep_ms(150);
+
+    lcd_cmd(0x01); sleep_ms(150); // SWRESET
+    lcd_cmd(0x11); sleep_ms(120); // SLPOUT
+
+    // Interface pixel format: 16-bit/pixel (RGB565)
+    uint8_t colmod = 0x55;
+    lcd_cmd(0x3A); lcd_data(&colmod, 1);
+
+    // Memory access control: orientation and RGB/BGR order
+    // 0x00 is a common default; if colors mirror swap BGR/RGB via MADCTL bit
+    uint8_t madctl = 0x00;
+    lcd_cmd(0x36); lcd_data(&madctl, 1);
+
+    // Set column/row full range for 240x240
+    uint8_t coladdr[] = { 0x00, 0x00, 0x00, 0xEF }; // 0..239
+    uint8_t rowaddr[] = { 0x00, 0x00, 0x00, 0xEF }; // 0..239
+    lcd_cmd(0x2A); lcd_data(coladdr, sizeof(coladdr));
+    lcd_cmd(0x2B); lcd_data(rowaddr, sizeof(rowaddr));
+
+    // Optional: inversion/gamma settings are omitted here; add from module datasheet if needed
+
+    lcd_cmd(0x29); sleep_ms(20); // DISPON
+
+    // Increase SPI speed for framebuffer transfers
+    spi_set_baudrate(SPI_PORT, 16000000); // try 16 MHz (reduce if artifacts)
+}
+
 int main() {
     stdio_init_all();
     spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
@@ -58,23 +94,9 @@ int main() {
     gpio_set_dir(PIN_CS, GPIO_OUT);
     gpio_set_dir(PIN_DC, GPIO_OUT);
     gpio_set_dir(PIN_RST, GPIO_OUT);
-
-    // Reset & Display Init
-    gpio_put(PIN_RST, 0);
-    sleep_ms(100);
-    gpio_put(PIN_RST, 1);
-    sleep_ms(100);
-
-    // Sleep Out
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    uint8_t cmd = 0x11; spi_write_blocking(SPI_PORT, &cmd, 1);
     gpio_put(PIN_CS, 1);
-    sleep_ms(120);
 
-    // Display ON
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    cmd = 0x29; spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
+    init_gc9a01();
 
     // Cubes
     uint16_t cx = SCREEN_W/2;
