@@ -17,6 +17,7 @@
 #define PIN_MOSI 11
 #define PIN_DC   14
 #define PIN_RST  15
+#define PIN_BUTTON 16
 
 spi_inst_t *SPI_PORT = spi1;
 
@@ -45,45 +46,36 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
     dice4_bytes, dice5_bytes, dice6_bytes
 };
 
-int main() {
-    stdio_init_all();
-    spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
-    gpio_set_function(10, GPIO_FUNC_SPI); // SCK
-    gpio_set_function(11, GPIO_FUNC_SPI); // MOSI
+bool button_pressed() {
+    if (gpio_get(PIN_BUTTON)) {
+        sleep_ms(20);  // kurz warten
+        return gpio_get(PIN_BUTTON); // nochmal checken
+    }
+    return false;
+}
 
-    // Pins
-    gpio_init(PIN_CS);
-    gpio_init(PIN_DC);
-    gpio_init(PIN_RST);
-    gpio_set_dir(PIN_CS, GPIO_OUT);
-    gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_set_dir(PIN_RST, GPIO_OUT);
-
-    // Reset & Display Init
-    gpio_put(PIN_RST, 0);
-    sleep_ms(100);
-    gpio_put(PIN_RST, 1);
-    sleep_ms(100);
-
-    // Sleep Out
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    uint8_t cmd = 0x11; spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
-    sleep_ms(120);
-
-    // Display ON
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    cmd = 0x29; spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
+void roll_dice() {
 
     // Cubes
     uint16_t cx = SCREEN_W/2;
     uint16_t cy = SCREEN_H/2;
 
+    // Reset screen
+    for (int i = 0; i < NUM_CUBES; i++) {
+            float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+            float x = cx + RADIUS * cosf(theta);
+            float y = cy + RADIUS * sinf(theta);
+
+            uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+            uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
+        }
+    sleep_ms(300);
+
     // Animation
     uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_CUBES];
-    for (int t = 0; t < 4; t++) {
+    for (int t = 0; t < 2; t++) {
         // Generate random dice for animation
         for (int i = 0; i < NUM_CUBES; i++) {
             seed = seed * 1664525 + 17;
@@ -136,6 +128,57 @@ int main() {
         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
         draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
+    }
+}
+
+
+int main() {
+    stdio_init_all();
+    spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
+    gpio_set_function(10, GPIO_FUNC_SPI); // SCK
+    gpio_set_function(11, GPIO_FUNC_SPI); // MOSI
+
+    // Pins
+    gpio_init(PIN_CS);
+    gpio_init(PIN_DC);
+    gpio_init(PIN_RST);
+    gpio_set_dir(PIN_CS, GPIO_OUT);
+    gpio_set_dir(PIN_DC, GPIO_OUT);
+    gpio_set_dir(PIN_RST, GPIO_OUT);
+
+    // Reset & Display Init
+    gpio_put(PIN_RST, 0);
+    sleep_ms(100);
+    gpio_put(PIN_RST, 1);
+    sleep_ms(100);
+
+    // Sleep Out
+    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
+    uint8_t cmd = 0x11; spi_write_blocking(SPI_PORT, &cmd, 1);
+    gpio_put(PIN_CS, 1);
+    sleep_ms(120);
+
+    // Display ON
+    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
+    cmd = 0x29; spi_write_blocking(SPI_PORT, &cmd, 1);
+    gpio_put(PIN_CS, 1);
+
+    // Button
+    gpio_init(PIN_BUTTON);
+    gpio_set_dir(PIN_BUTTON, GPIO_IN);
+    gpio_pull_down(PIN_BUTTON);
+
+    while (1) {
+
+        if (button_pressed()) {
+            roll_dice();
+
+            while (gpio_get(PIN_BUTTON)) {
+                sleep_ms(10);
+            }
+        }
+
+        sleep_ms(10);
     }
 
     while (true) { tight_loop_contents(); }
