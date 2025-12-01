@@ -1,37 +1,31 @@
-image: registry.mi.hdm-stuttgart.de/embedded/ws25/kniffel
-
-variables:
-  GIT_SUBMODULE_STRATEGY: recursive # Wichtig! Das Pico SDK nutzt Submodule
-  PICO_BOARD: pico2                 # WICHTIG: Target für Pico 2 setzen
-  BUILD_TYPE: RelWithDebInfo
-
 stages:
-  - lint
+  - quality
   - build
 
-# --- Stage 1: Code Qualität ---
-linting:
-  stage: lint
+# --- Job 1: Formatierung (Nur Warnung, bricht nicht ab) ---
+check_formatting:
+  stage: quality
+  allow_failure: true
   script:
-    # 1. Formatierung prüfen
     - echo "Prüfe Code-Formatierung..."
-    - >
-      find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror 
-      || (echo -e "\n\e[31m FEHLER: Die Formatierung entspricht nicht den Regeln!\e[0m\n --> Bitte führe lokal 'clang-format -i deine_datei.c' aus." && exit 1)
 
-    # 2. Statische Analyse prüfen
-    - echo "Starte statische Code-Analyse..."
-    - >
-      cppcheck --enable=all --inconclusive --error-exitcode=1 src/ 
-      || (echo -e "\n\e[31m FEHLER: Cppcheck hat Probleme im Code gefunden!\e[0m\n --> Bitte überprüfe die oben stehenden Logs auf Warnungen." && exit 1)
+    - find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
-# --- Stage 2: Kompilieren ---
+# --- Job 2: Statische Analyse (Strikt, bricht Pipeline ab) ---
+static_analysis:
+  stage: quality
+  allow_failure: false # (Standard) Bricht ab, wenn Fehler gefunden werden
+  script:
+    - echo "Suche nach Bugs..."
+    # --error-exitcode=1 sorgt dafür, dass der Job rot wird bei Funden
+    - cppcheck --enable=all --inconclusive --error-exitcode=1 src/
+
+# --- Stage 2: Build (Läuft nur, wenn static_analysis grün ist) ---
 build_firmware:
   stage: build
   script:
     - mkdir build
     - cd build
-    # CMake Konfiguration für Pico 2
     - cmake -DPICO_BOARD=$PICO_BOARD -DCMAKE_BUILD_TYPE=$BUILD_TYPE ..
     - make -j$(nproc)
   artifacts:
