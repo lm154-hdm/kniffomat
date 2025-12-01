@@ -1,0 +1,31 @@
+---
+# Wir basieren auf dem Google-Style, passen ihn aber an
+BasedOnStyle: Google
+
+# Einrückung: 4 Leerzeichen (statt Google-Standard 2)
+IndentWidth: 4
+TabWidth: 4
+
+# Keine Tabulatoren nutzen, nur Leerzeichen
+UseTab: Never
+
+# Maximale Zeilenlänge (80 ist klassisch, 100 oder 120 moderner)
+ColumnLimit: 100
+
+# Klammern: { am Zeilenende (K&R Style)
+# Wenn du sie lieber in einer neuen Zeile hast, nutze "Allman"
+BreakBeforeBraces: Attach
+
+# Zeiger * gehört zum Typ (int* a) oder Variable (int *a)?
+# Left = int* a; Right = int *a;
+PointerAlignment: Right
+
+# Leerzeichen um Operatoren (a = b + c)
+SpaceBeforeAssignmentOperators: true
+
+# Switch-Case Einrückung
+IndentCaseLabels: true
+
+# Sortiert Includes alphabetisch (hilft gegen Chaos)
+SortIncludes: true
+...
