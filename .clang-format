@@ -1,31 +1,32 @@
 ---
-# Wir basieren auf dem Google-Style, passen ihn aber an
+# Basis-Stil (Google ist gut für C/C++)
 BasedOnStyle: Google
 
-# Einrückung: 4 Leerzeichen (statt Google-Standard 2)
+# --- WICHTIGE ANPASSUNGEN ---
+
+# Einrückung: 4 Leerzeichen (Standard in den meisten Projekten)
 IndentWidth: 4
 TabWidth: 4
 
-# Keine Tabulatoren nutzen, nur Leerzeichen
+# Keine Tabs, nur Leerzeichen
 UseTab: Never
 
-# Maximale Zeilenlänge (80 ist klassisch, 100 oder 120 moderner)
+# Maximale Zeilenlänge (verhindert extrem breiten Code)
 ColumnLimit: 100
 
-# Klammern: { am Zeilenende (K&R Style)
-# Wenn du sie lieber in einer neuen Zeile hast, nutze "Allman"
+# Wählt deinen Stil (Attach = kompakt, Allman = luftig)
+# Ändere das hier auf 'Allman', wenn du die Klammern in neuer Zeile willst
 BreakBeforeBraces: Attach
 
-# Zeiger * gehört zum Typ (int* a) oder Variable (int *a)?
-# Left = int* a; Right = int *a;
+# Zeiger-Sternchen beim Typ (int* ptr) oder Variable (int *ptr)?
+# Right bedeutet: int *ptr (üblich in Embedded C)
 PointerAlignment: Right
 
-# Leerzeichen um Operatoren (a = b + c)
+# Sortiert deine #include Befehle alphabetisch
+SortIncludes: true
+
+# Fügt Leerzeichen bei Operatoren ein (x = a + b statt x=a+b)
 SpaceBeforeAssignmentOperators: true
 
-# Switch-Case Einrückung
+# Richtet switch-case sauber ein
 IndentCaseLabels: true
-
-# Sortiert Includes alphabetisch (hilft gegen Chaos)
-SortIncludes: true
-...
