@@ -35,7 +35,11 @@ pico_sdk_init()
 
 # Add executable. Default name is the project name, version 0.1
 
-add_executable(Kniffel main.c )
+add_executable(Kniffel 
+    src/main.c 
+    src/dice.c     
+    src/helpers.c
+) 
 
 pico_set_program_name(Kniffel "Kniffel")
 pico_set_program_version(Kniffel "0.1")
@@ -52,7 +56,7 @@ target_link_libraries(Kniffel
 
 # Add the standard include files to the build
 target_include_directories(Kniffel PRIVATE
-        ${CMAKE_CURRENT_LIST_DIR}
+        ${CMAKE_CURRENT_LIST_DIR}/src
 )
 
 # Add any user requested libraries
