@@ -12,11 +12,11 @@
 
 // Pins
 #define PIN_MISO 12
-#define PIN_CS   13
-#define PIN_SCK  10
+#define PIN_CS 13
+#define PIN_SCK 10
 #define PIN_MOSI 11
-#define PIN_DC   14
-#define PIN_RST  15
+#define PIN_DC 14
+#define PIN_RST 15
 
 spi_inst_t *SPI_PORT = spi1;
 
@@ -42,10 +42,10 @@ extern const uint8_t dice_clear_bytes[480];
 
 static const uint8_t *dice_arr[NUM_CUBES] = {
     dice1_bytes, dice2_bytes, dice3_bytes,
-    dice4_bytes, dice5_bytes, dice6_bytes
-};
+    dice4_bytes, dice5_bytes, dice6_bytes};
 
-int main() {
+int main()
+{
     stdio_init_all();
     spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
     gpio_set_function(10, GPIO_FUNC_SPI); // SCK
@@ -66,31 +66,38 @@ int main() {
     sleep_ms(100);
 
     // Sleep Out
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    uint8_t cmd = 0x11; spi_write_blocking(SPI_PORT, &cmd, 1);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    uint8_t cmd = 0x11;
+    spi_write_blocking(SPI_PORT, &cmd, 1);
     gpio_put(PIN_CS, 1);
     sleep_ms(120);
 
     // Display ON
-    gpio_put(PIN_CS, 0); gpio_put(PIN_DC, 0);
-    cmd = 0x29; spi_write_blocking(SPI_PORT, &cmd, 1);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    cmd = 0x29;
+    spi_write_blocking(SPI_PORT, &cmd, 1);
     gpio_put(PIN_CS, 1);
 
     // Cubes
-    uint16_t cx = SCREEN_W/2;
-    uint16_t cy = SCREEN_H/2;
+    uint16_t cx = SCREEN_W / 2;
+    uint16_t cy = SCREEN_H / 2;
 
     // Animation
-    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
+    uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_CUBES];
-    for (int t = 0; t < 4; t++) {
+    for (int t = 0; t < 4; t++)
+    {
         // Generate random dice for animation
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_CUBES; i++)
+        {
             seed = seed * 1664525 + 17;
             anim[i] = (seed % 6) + 1; // 1-6
         }
         // Draw the random dice
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_CUBES; i++)
+        {
             float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
             float x = cx + RADIUS * cosf(theta);
             float y = cy + RADIUS * sinf(theta);
@@ -101,7 +108,8 @@ int main() {
             draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE, 0xFFFF);
         }
         sleep_ms(1000);
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_CUBES; i++)
+        {
             float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
             float x = cx + RADIUS * cosf(theta);
             float y = cy + RADIUS * sinf(theta);
@@ -117,17 +125,20 @@ int main() {
     // true randomness is not possible but can be noise detected from unused pins
     // adc_read()
     uint8_t rolled[NUM_CUBES];
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_CUBES; i++)
+    {
         seed = seed * 1664525 + 1013904223;
         rolled[i] = (seed % 6) + 1; // 1-6
     }
     printf("Rolled dice: ");
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_CUBES; i++)
+    {
         printf("%d ", rolled[i]);
     }
 
     // Draw the rolled dice in a concentric radial pattern
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_CUBES; i++)
+    {
         float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
         float x = cx + RADIUS * cosf(theta);
         float y = cy + RADIUS * sinf(theta);
@@ -138,5 +149,8 @@ int main() {
         draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
     }
 
-    while (true) { tight_loop_contents(); }
+    while (true)
+    {
+        tight_loop_contents();
+    }
 }
