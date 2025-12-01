@@ -13,10 +13,17 @@ stages:
 linting:
   stage: lint
   script:
-    # Prüft Formatierung (optional: Fail bei Abweichung)
-    - find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror
-    # Statische Analyse
-    - cppcheck --enable=all --inconclusive --error-exitcode=1 src/
+    # 1. Formatierung prüfen
+    - echo "Prüfe Code-Formatierung..."
+    - >
+      find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror 
+      || (echo -e "\n\e[31m FEHLER: Die Formatierung entspricht nicht den Regeln!\e[0m\n --> Bitte führe lokal 'clang-format -i deine_datei.c' aus." && exit 1)
+
+    # 2. Statische Analyse prüfen
+    - echo "Starte statische Code-Analyse..."
+    - >
+      cppcheck --enable=all --inconclusive --error-exitcode=1 src/ 
+      || (echo -e "\n\e[31m FEHLER: Cppcheck hat Probleme im Code gefunden!\e[0m\n --> Bitte überprüfe die oben stehenden Logs auf Warnungen." && exit 1)
 
 # --- Stage 2: Kompilieren ---
 build_firmware:
