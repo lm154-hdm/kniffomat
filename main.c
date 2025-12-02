@@ -48,7 +48,7 @@ int main() {
     stdio_init_all();
     spi_init(SPI_PORT, 2 * 1000 * 1000); // 2 MHz
     gpio_set_function(PIN_CLK, GPIO_FUNC_SPI); // SCK
-    gpio_set_function(PIN_DIN, GPIO_FUNC_SPI); // MOSI
+    gpio_set_function(PIN_DIN, GPIO_FUNC_SPI); // Data
 
     gc9a01_init(SPI_PORT, PIN_CS, PIN_CLK, PIN_DIN, PIN_DC, PIN_RST);
     
