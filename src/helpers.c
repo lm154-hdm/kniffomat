@@ -11,15 +11,16 @@
 #define PIN_DC 14
 #define PIN_RST 15
 
-void clear_bitmap(uint8_t *bm, int cube_size) {
-    for (int y = 0; y < cube_size; y++) {
-        for (int x = 0; x < cube_size; x++) {
-            bm[y * cube_size + x] = 0;
-        }
-    }
-}
+// void clear_bitmap(uint8_t *bm, int cube_size) {
+//     for (int y = 0; y < cube_size; y++) {
+//         for (int x = 0; x < cube_size; x++) {
+//             bm[y * cube_size + x] = 0;
+//         }
+//     }
+// }
 
-void tft_set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+static void tft_set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1,
+                           uint16_t y1) {
     uint8_t data[4];
     // Column Address Set
     gpio_put(PIN_CS, 0);
@@ -89,8 +90,8 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
-    uint8_t col_hi = (color >> 8) & 0xFF;
-    uint8_t col_lo = color & 0xFF;
+    // uint8_t col_hi = (color >> 8) & 0xFF;
+    // uint8_t col_lo = color & 0xFF;
     tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
