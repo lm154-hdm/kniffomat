@@ -36,7 +36,7 @@ static inline void data16(uint16_t d) {
 }
 
 // GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
-static void gc9a01_init(spi_inst_t* spi) {
+void gc9a01_init(spi_inst_t* spi) {
     _spi = spi;
     // SPI setup: start slow for init
     gpio_init(PIN_DC);  gpio_set_dir(PIN_DC, GPIO_OUT);
