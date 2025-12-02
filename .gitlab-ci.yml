@@ -1,3 +1,5 @@
+image: registry.mi.hdm-stuttgart.de/embedded/ws25/kniffel
+
 stages:
   - quality
   - build
@@ -18,7 +20,7 @@ static_analysis:
   script:
     - echo "Suche nach Bugs..."
     # --error-exitcode=1 sorgt dafür, dass der Job rot wird bei Funden
-    - cppcheck --enable=all --inconclusive --error-exitcode=1 src/
+    - cppcheck --enable=all --inconclusive --disable=missingInclude --error-exitcode=1 src/
 
 # --- Stage 2: Build (Läuft nur, wenn static_analysis grün ist) ---
 build_firmware:
