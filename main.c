@@ -55,9 +55,9 @@ int main() {
     
     for (int i = 0; i < 100; ++i) {
         display_fill(0xFFFF);
-        sleep_ms(500);
+        sleep_ms(1000);
         display_fill(0x0000);
-        sleep_ms(500);
+        sleep_ms(1000);
     }
 
     // // Cubes

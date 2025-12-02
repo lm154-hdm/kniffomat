@@ -13,10 +13,10 @@ static spi_inst_t* _spi;
 #define PIN_DC   14
 #define PIN_RST  15
 
-static inline void cmd(uint8_t c) {
+static inline void cmd(uint8_t cmd) {
     gpio_put(PIN_DC, 0);
     gpio_put(PIN_CS, 0);
-    spi_write_blocking(_spi, &c, 1);
+    spi_write_blocking(_spi, &cmd, 1);
     gpio_put(PIN_CS, 1);
 }
 
@@ -34,6 +34,35 @@ static inline void data16(uint16_t d) {
     spi_write_blocking(_spi, buf, 2);
     gpio_put(PIN_CS, 1);
 }
+
+void gc9a01_reset(void) {
+    gpio_put(PIN_RST, 1);
+    sleep_ms(10);
+    gpio_put(PIN_RST, 0);
+    sleep_ms(10);
+    gpio_put(PIN_RST, 1);
+    sleep_ms(10);
+}
+
+void gc9a01_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
+    // Column address set
+    gc9a01_command(0x2A);
+    gc9a01_data(0x00);
+    gc9a01_data(x0);
+    gc9a01_data(0x00);
+    gc9a01_data(x1 - 1);
+
+    // Row address set
+    gc9a01_command(0x2B);
+    gc9a01_data(0x00);
+    gc9a01_data(y0);
+    gc9a01_data(0x00);
+    gc9a01_data(y1 - 1);
+
+    // Memory write
+    gc9a01_command(0x2C);
+}
+
 
 // GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
 void gc9a01_init(spi_inst_t* spi) {
@@ -55,6 +84,7 @@ void gc9a01_init(spi_inst_t* spi) {
     cmd(0xEF);
 
     cmd(0xEB); data8(0x14);
+
     cmd(0x84); data8(0x40);
     cmd(0x85); data8(0xFF);
     cmd(0x86); data8(0xFF);
@@ -68,13 +98,194 @@ void gc9a01_init(spi_inst_t* spi) {
     cmd(0x8E); data8(0xFF);
     cmd(0x8F); data8(0xFF);
 
-    cmd(0x3A); data8(0x05);  // 16-bit color
-    cmd(0x36); data8(0x00);  // MADCTL
+    cmd(0xB6);
+    data8(0x00);
+    data8(0x20);
 
-    cmd(0x21); // Inversion on
-    cmd(0x11); // Sleep out
+    cmd(0x36);
+    data8(0x08);
+
+    cmd(0x3A);
+    data8(0x05);   // 16-bit color
+
+    cmd(0x90);
+    data8(0x08);
+    data8(0x08);
+    data8(0x08);
+    data8(0x08);
+
+    cmd(0xBD);
+    data8(0x06);
+
+    cmd(0xBC);
+    data8(0x00);
+
+    cmd(0xFF);
+    data8(0x60);
+    data8(0x01);
+    data8(0x04);
+
+    cmd(0xC3);
+    data8(0x13);
+
+    cmd(0xC4);
+    data8(0x13);
+
+    cmd(0xC9);
+    data8(0x22);
+
+    cmd(0xBE);
+    data8(0x11);
+
+    cmd(0xE1);
+    data8(0x10);
+    data8(0x0E);
+
+    cmd(0xDF);
+    data8(0x21);
+    data8(0x0C);
+    data8(0x02);
+
+    cmd(0xF0);
+    data8(0x45);
+    data8(0x09);
+    data8(0x08);
+    data8(0x08);
+    data8(0x26);
+    data8(0x2A);
+
+    cmd(0xF1);
+    data8(0x43);
+    data8(0x70);
+    data8(0x72);
+    data8(0x36);
+    data8(0x37);
+    data8(0x6F);
+
+    cmd(0xF2);
+    data8(0x45);
+    data8(0x09);
+    data8(0x08);
+    data8(0x08);
+    data8(0x26);
+    data8(0x2A);
+
+    cmd(0xF3);
+    data8(0x43);
+    data8(0x70);
+    data8(0x72);
+    data8(0x36);
+    data8(0x37);
+    data8(0x6F);
+
+    cmd(0xED);
+    data8(0x1B);
+    data8(0x0B);
+
+    cmd(0xAE);
+    data8(0x77);
+
+    cmd(0xCD);
+    data8(0x63);
+
+    cmd(0x70);
+    data8(0x07);
+    data8(0x07);
+    data8(0x04);
+    data8(0x0E);
+    data8(0x0F);
+    data8(0x09);
+    data8(0x07);
+    data8(0x08);
+    data8(0x03);
+
+    cmd(0xE8);
+    data8(0x34);
+
+    cmd(0x62);
+    data8(0x18);
+    data8(0x0D);
+    data8(0x71);
+    data8(0xED);
+    data8(0x70);
+    data8(0x70);
+    data8(0x18);
+    data8(0x0F);
+    data8(0x71);
+    data8(0xEF);
+    data8(0x70);
+    data8(0x70);
+
+    cmd(0x63);
+    data8(0x18);
+    data8(0x11);
+    data8(0x71);
+    data8(0xF1);
+    data8(0x70);
+    data8(0x70);
+    data8(0x18);
+    data8(0x13);
+    data8(0x71);
+    data8(0xF3);
+    data8(0x70);
+    data8(0x70);
+
+    cmd(0x64);
+    data8(0x28);
+    data8(0x29);
+    data8(0xF1);
+    data8(0x01);
+    data8(0xF1);
+    data8(0x00);
+    data8(0x07);
+
+    cmd(0x66);
+    data8(0x3C);
+    data8(0x00);
+    data8(0xCD);
+    data8(0x67);
+    data8(0x45);
+    data8(0x45);
+    data8(0x10);
+    data8(0x00);
+    data8(0x00);
+    data8(0x00);
+
+    cmd(0x67);
+    data8(0x00);
+    data8(0x3C);
+    data8(0x00);
+    data8(0x00);
+    data8(0x00);
+    data8(0x01);
+    data8(0x54);
+    data8(0x10);
+    data8(0x32);
+    data8(0x98);
+
+    cmd(0x74);
+    data8(0x10);
+    data8(0x85);
+    data8(0x80);
+    data8(0x00);
+    data8(0x00);
+    data8(0x4E);
+    data8(0x00);
+
+    cmd(0x98);
+    data8(0x3E);
+    data8(0x07);
+
+    cmd(0x35);  // TE on
+    cmd(0x21);  // Display inversion on
+
+    cmd(0x11);  // Sleep out
     sleep_ms(120);
-    cmd(0x29); // Display ON
+
+    cmd(0x29);  // Display on
+    sleep_ms(20);
+
+    // ---- End of init sequence ---- //
 }
 
 void draw_pixel(int x, int y, uint16_t color) {
