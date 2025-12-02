@@ -10,11 +10,11 @@ check_tools:
   stage: debug
   allow_failure: false
   script:
-    - echo "CPPCheck Version"
-    - cppcheck --version
+    #- echo "CPPCheck Version"
+    #- cppcheck --version
 
-    - echo "CPPCheck Header"
-    - cppcheck --help
+    #- echo "CPPCheck Header"
+    #- cppcheck --help
 # --- Job 1: Formatierung (Nur Warnung, bricht nicht ab) ---
 check_formatting:
   stage: quality
@@ -31,7 +31,7 @@ static_analysis:
   script:
     - echo "Suche nach Bugs..."
     # --error-exitcode=1 sorgt dafür, dass der Job rot wird bei Funden
-    - cppcheck --enable=all --inconclusive --disable=missingInclude --error-exitcode=1 src/
+    - cppcheck --enable=all --inconclusive --suppress=missingInclude --error-exitcode=1 src/
 
 # --- Stage 2: Build (Läuft nur, wenn static_analysis grün ist) ---
 build_firmware:
