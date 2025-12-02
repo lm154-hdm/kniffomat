@@ -1,13 +1,22 @@
 #ifndef HELPERS_H
 #define HELPERS_H
 #include <stdint.h>
+#include <stddef.h>
 #include "hardware/spi.h"
 
 void clear_bitmap(uint8_t *bm, int cube_size);
+
+// exported GC9A01 helper functions implemented in helpers.c
+void lcd_cmd(spi_inst_t *spi_port, uint8_t c);
+void lcd_data(spi_inst_t *spi_port, const uint8_t *d, size_t len);
+void lcd_send16(spi_inst_t *spi_port, const uint16_t *pixels, size_t count);
+void set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
+
+// compatibility / existing API
 void tft_set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1);
-void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data, 
+void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data,
                     int cube_size, uint16_t color);
-void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data, 
+void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data,
                     int cube_size, uint16_t color);
 
 #endif // HELPERS_H

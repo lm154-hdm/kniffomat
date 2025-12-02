@@ -48,37 +48,42 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
 // GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
 static void init_gc9a01() {
     // SPI setup: start slow for init
-    spi_set_format(SPI_PORT, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
-    spi_set_baudrate(SPI_PORT, 2000000); // 2 MHz for init
+    gpio_init(PIN_DC);  gpio_set_dir(PIN_DC, GPIO_OUT);
+    gpio_init(PIN_RST); gpio_set_dir(PIN_RST, GPIO_OUT);
+    gpio_init(PIN_CS);  gpio_set_dir(PIN_CS, GPIO_OUT);
 
     // Reset sequence
+    gpio_put(PIN_CS, 1); 
     gpio_put(PIN_RST, 0); sleep_ms(50);
     gpio_put(PIN_RST, 1); sleep_ms(150);
 
-    lcd_cmd(0x01); sleep_ms(150); // SWRESET
-    lcd_cmd(0x11); sleep_ms(120); // SLPOUT
+    cmd(0xEF);
+    cmd(0xEB); data8(0x14);
 
-    // Interface pixel format: 16-bit/pixel (RGB565)
-    uint8_t colmod = 0x55;
-    lcd_cmd(0x3A); lcd_data(&colmod, 1);
+    cmd(0xFE);
+    cmd(0xEF);
 
-    // Memory access control: orientation and RGB/BGR order
-    // 0x00 is a common default; if colors mirror swap BGR/RGB via MADCTL bit
-    uint8_t madctl = 0x00;
-    lcd_cmd(0x36); lcd_data(&madctl, 1);
+    cmd(0xEB); data8(0x14);
+    cmd(0x84); data8(0x40);
+    cmd(0x85); data8(0xFF);
+    cmd(0x86); data8(0xFF);
+    cmd(0x87); data8(0xFF);
+    cmd(0x88); data8(0x0A);
+    cmd(0x89); data8(0x21);
+    cmd(0x8A); data8(0x00);
+    cmd(0x8B); data8(0x80);
+    cmd(0x8C); data8(0x01);
+    cmd(0x8D); data8(0x01);
+    cmd(0x8E); data8(0xFF);
+    cmd(0x8F); data8(0xFF);
 
-    // Set column/row full range for 240x240
-    uint8_t coladdr[] = { 0x00, 0x00, 0x00, 0xEF }; // 0..239
-    uint8_t rowaddr[] = { 0x00, 0x00, 0x00, 0xEF }; // 0..239
-    lcd_cmd(0x2A); lcd_data(coladdr, sizeof(coladdr));
-    lcd_cmd(0x2B); lcd_data(rowaddr, sizeof(rowaddr));
+    cmd(0x3A); data8(0x05);  // 16-bit color
+    cmd(0x36); data8(0x00);  // MADCTL
 
-    // Optional: inversion/gamma settings are omitted here; add from module datasheet if needed
-
-    lcd_cmd(0x29); sleep_ms(20); // DISPON
-
-    // Increase SPI speed for framebuffer transfers
-    spi_set_baudrate(SPI_PORT, 16000000); // try 16 MHz (reduce if artifacts)
+    cmd(0x21); // Inversion on
+    cmd(0x11); // Sleep out
+    sleep_ms(120);
+    cmd(0x29); // Display ON
 }
 
 int main() {
