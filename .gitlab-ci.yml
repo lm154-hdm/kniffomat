@@ -1,3 +1,5 @@
+image: registry.mi.hdm-stuttgart.de/embedded/ws25/kniffel
+
 stages:
   - quality
   - build
