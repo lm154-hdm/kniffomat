@@ -45,125 +45,82 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
     dice4_bytes, dice5_bytes, dice6_bytes
 };
 
-// GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
-static void init_gc9a01() {
-    // SPI setup: start slow for init
-    gpio_init(PIN_DC);  gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_init(PIN_RST); gpio_set_dir(PIN_RST, GPIO_OUT);
-    gpio_init(PIN_CS);  gpio_set_dir(PIN_CS, GPIO_OUT);
-
-    // Reset sequence
-    gpio_put(PIN_CS, 1); 
-    gpio_put(PIN_RST, 0); sleep_ms(50);
-    gpio_put(PIN_RST, 1); sleep_ms(150);
-
-    cmd(0xEF);
-    cmd(0xEB); data8(0x14);
-
-    cmd(0xFE);
-    cmd(0xEF);
-
-    cmd(0xEB); data8(0x14);
-    cmd(0x84); data8(0x40);
-    cmd(0x85); data8(0xFF);
-    cmd(0x86); data8(0xFF);
-    cmd(0x87); data8(0xFF);
-    cmd(0x88); data8(0x0A);
-    cmd(0x89); data8(0x21);
-    cmd(0x8A); data8(0x00);
-    cmd(0x8B); data8(0x80);
-    cmd(0x8C); data8(0x01);
-    cmd(0x8D); data8(0x01);
-    cmd(0x8E); data8(0xFF);
-    cmd(0x8F); data8(0xFF);
-
-    cmd(0x3A); data8(0x05);  // 16-bit color
-    cmd(0x36); data8(0x00);  // MADCTL
-
-    cmd(0x21); // Inversion on
-    cmd(0x11); // Sleep out
-    sleep_ms(120);
-    cmd(0x29); // Display ON
-}
-
 int main() {
     stdio_init_all();
     spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
     gpio_set_function(10, GPIO_FUNC_SPI); // SCK
     gpio_set_function(11, GPIO_FUNC_SPI); // MOSI
 
-    // Pins
-    gpio_init(PIN_CS);
-    gpio_init(PIN_DC);
-    gpio_init(PIN_RST);
-    gpio_set_dir(PIN_CS, GPIO_OUT);
-    gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_set_dir(PIN_RST, GPIO_OUT);
-    gpio_put(PIN_CS, 1);
-
-    init_gc9a01();
-
-    // Cubes
-    uint16_t cx = SCREEN_W/2;
-    uint16_t cy = SCREEN_H/2;
-
-    // Animation
-    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
-    uint8_t anim[NUM_CUBES];
-    for (int t = 0; t < 4; t++) {
-        // Generate random dice for animation
-        for (int i = 0; i < NUM_CUBES; i++) {
-            seed = seed * 1664525 + 17;
-            anim[i] = (seed % 6) + 1; // 1-6
-        }
-        // Draw the random dice
-        for (int i = 0; i < NUM_CUBES; i++) {
-            float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
-            float x = cx + RADIUS * cosf(theta);
-            float y = cy + RADIUS * sinf(theta);
-
-            uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
-            uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
-
-            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE, 0xFFFF);
-        }
-        sleep_ms(1000);
-        for (int i = 0; i < NUM_CUBES; i++) {
-            float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
-            float x = cx + RADIUS * cosf(theta);
-            float y = cy + RADIUS * sinf(theta);
-
-            uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
-            uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
-            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
-        }
+    gc9a01_init(SPI_PORT);
+    
+    for (int i = 0; i < 100; ++i) {
+        display_fill(0xFFFF);
+        sleep_ms(500);
+        display_fill(0x0000);
         sleep_ms(500);
     }
 
-    // Roll 6 dice using seeded randomness
-    // true randomness is not possible but can be noise detected from unused pins
-    // adc_read()
-    uint8_t rolled[NUM_CUBES];
-    for (int i = 0; i < NUM_CUBES; i++) {
-        seed = seed * 1664525 + 1013904223;
-        rolled[i] = (seed % 6) + 1; // 1-6
-    }
-    printf("Rolled dice: ");
-    for (int i = 0; i < NUM_CUBES; i++) {
-        printf("%d ", rolled[i]);
-    }
+    // // Cubes
+    // uint16_t cx = SCREEN_W/2;
+    // uint16_t cy = SCREEN_H/2;
 
-    // Draw the rolled dice in a concentric radial pattern
-    for (int i = 0; i < NUM_CUBES; i++) {
-        float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
-        float x = cx + RADIUS * cosf(theta);
-        float y = cy + RADIUS * sinf(theta);
+    // // Animation
+    // uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
+    // uint8_t anim[NUM_CUBES];
+    // for (int t = 0; t < 4; t++) {
+    //     // Generate random dice for animation
+    //     for (int i = 0; i < NUM_CUBES; i++) {
+    //         seed = seed * 1664525 + 17;
+    //         anim[i] = (seed % 6) + 1; // 1-6
+    //     }
+    //     // Draw the random dice
+    //     for (int i = 0; i < NUM_CUBES; i++) {
+    //         float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+    //         float x = cx + RADIUS * cosf(theta);
+    //         float y = cy + RADIUS * sinf(theta);
 
-        uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
-        uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+    //         uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+    //         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
-        draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
-    }
+    //         draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE, 0xFFFF);
+    //     }
+    //     sleep_ms(1000);
+    //     for (int i = 0; i < NUM_CUBES; i++) {
+    //         float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+    //         float x = cx + RADIUS * cosf(theta);
+    //         float y = cy + RADIUS * sinf(theta);
+
+    //         uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+    //         uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+    //         draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
+    //     }
+    //     sleep_ms(500);
+    // }
+
+    // // Roll 6 dice using seeded randomness
+    // // true randomness is not possible but can be noise detected from unused pins
+    // // adc_read()
+    // uint8_t rolled[NUM_CUBES];
+    // for (int i = 0; i < NUM_CUBES; i++) {
+    //     seed = seed * 1664525 + 1013904223;
+    //     rolled[i] = (seed % 6) + 1; // 1-6
+    // }
+    // printf("Rolled dice: ");
+    // for (int i = 0; i < NUM_CUBES; i++) {
+    //     printf("%d ", rolled[i]);
+    // }
+
+    // // Draw the rolled dice in a concentric radial pattern
+    // for (int i = 0; i < NUM_CUBES; i++) {
+    //     float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+    //     float x = cx + RADIUS * cosf(theta);
+    //     float y = cy + RADIUS * sinf(theta);
+
+    //     uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+    //     uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+
+    //     draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
+    // }
 
     while (true) { tight_loop_contents(); }
 }
