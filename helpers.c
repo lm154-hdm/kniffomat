@@ -5,42 +5,41 @@
 #include "helpers.h"
 
 static spi_inst_t* _spi;
-
-#define PIN_MISO 12
-#define PIN_CS   13
-#define PIN_SCK  10
-#define PIN_MOSI 11
-#define PIN_DC   14
-#define PIN_RST  15
+static uint8_t _miso;
+static uint8_t _cs; 
+static uint8_t _sck;
+static uint8_t _mosi;
+static uint8_t _dc;
+static uint8_t _rst;
 
 static inline void cmd(uint8_t cmd) {
-    gpio_put(PIN_DC, 0);
-    gpio_put(PIN_CS, 0);
+    gpio_put(_dc, 0);
+    gpio_put(_cs, 0);
     spi_write_blocking(_spi, &cmd, 1);
-    gpio_put(PIN_CS, 1);
+    gpio_put(_cs, 1);
 }
 
 static inline void data8(uint8_t d) {
-    gpio_put(PIN_DC, 1);
-    gpio_put(PIN_CS, 0);
+    gpio_put(_dc, 1);
+    gpio_put(_cs, 0);
     spi_write_blocking(_spi, &d, 1);
-    gpio_put(PIN_CS, 1);
+    gpio_put(_cs, 1);
 }
 
 static inline void data16(uint16_t d) {
     uint8_t buf[2] = { d >> 8, d & 0xFF };
-    gpio_put(PIN_DC, 1);
-    gpio_put(PIN_CS, 0);
+    gpio_put(_dc, 1);
+    gpio_put(_cs, 0);
     spi_write_blocking(_spi, buf, 2);
-    gpio_put(PIN_CS, 1);
+    gpio_put(_cs, 1);
 }
 
 void gc9a01_reset(void) {
-    gpio_put(PIN_RST, 1);
+    gpio_put(_rst, 1);
     sleep_ms(10);
-    gpio_put(PIN_RST, 0);
+    gpio_put(_rst, 0);
     sleep_ms(10);
-    gpio_put(PIN_RST, 1);
+    gpio_put(_rst, 1);
     sleep_ms(10);
 }
 
@@ -65,18 +64,24 @@ void gc9a01_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
 
 
 // GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
-void gc9a01_init(spi_inst_t* spi) {
-    _spi = spi;
+void gc9a01_init(spi_inst_t* spi,
+                     uint8_t pin_miso, uint8_t pin_cs, uint8_t pin_sck,
+                     uint8_t pin_mosi, uint8_t pin_dc, uint8_t pin_rst) {
+        _spi = spi;
+        _miso = pin_miso;
+        _cs   = pin_cs;
+        _sck  = pin_sck;
+        _mosi = pin_mosi;
+        _dc   = pin_dc;
+        _rst  = pin_rst;
     // SPI setup: start slow for init
-    gpio_init(PIN_DC);  gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_init(PIN_RST); gpio_set_dir(PIN_RST, GPIO_OUT);
-    gpio_init(PIN_CS);  gpio_set_dir(PIN_CS, GPIO_OUT);
-
+    gpio_init(_dc);  gpio_set_dir(_dc, GPIO_OUT);
+    gpio_init(_rst); gpio_set_dir(_rst, GPIO_OUT);
+    gpio_init(_cs);  gpio_set_dir(_cs, GPIO_OUT);
     // Reset sequence
-    gpio_put(PIN_CS, 1); 
-    gpio_put(PIN_RST, 0); sleep_ms(50);
-    gpio_put(PIN_RST, 1); sleep_ms(150);
-
+    gpio_put(_cs, 1); 
+    gpio_put(_rst, 0); sleep_ms(50);
+    gpio_put(_rst, 1); sleep_ms(150);
     cmd(0xEF);
     cmd(0xEB); data8(0x14);
 

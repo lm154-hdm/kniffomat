@@ -47,11 +47,11 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
 
 int main() {
     stdio_init_all();
-    spi_init(SPI_PORT, 10 * 1000 * 1000); // 10 MHz
-    gpio_set_function(10, GPIO_FUNC_SPI); // SCK
-    gpio_set_function(11, GPIO_FUNC_SPI); // MOSI
+    spi_init(SPI_PORT, 2 * 1000 * 1000); // 2 MHz
+    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI); // SCK
+    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI); // MOSI
 
-    gc9a01_init(SPI_PORT);
+    gc9a01_init(SPI_PORT, PIN_MISO, PIN_CS, PIN_SCK, PIN_MOSI, PIN_DC, PIN_RST);
     
     for (int i = 0; i < 100; ++i) {
         display_fill(0xFFFF);
