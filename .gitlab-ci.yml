@@ -10,11 +10,11 @@ check_tools:
   stage: debug
   allow_failure: false
   script:
-    echo "CPPCheck Version"
-    cppcheck --version
+    - echo "CPPCheck Version"
+    - cppcheck --version
 
-    echo "CPPCheck Header"
-    cppcheck --help
+    - echo "CPPCheck Header"
+    - cppcheck --help
 # --- Job 1: Formatierung (Nur Warnung, bricht nicht ab) ---
 check_formatting:
   stage: quality
