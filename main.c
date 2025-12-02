@@ -11,10 +11,9 @@
 #define M_PI 3.14159265358979323846
 
 // Pins
-#define PIN_MISO 12
+#define PIN_CLK  10
+#define PIN_DIN  11
 #define PIN_CS   13
-#define PIN_SCK  10
-#define PIN_MOSI 11
 #define PIN_DC   14
 #define PIN_RST  15
 
@@ -48,10 +47,10 @@ static const uint8_t *dice_arr[NUM_CUBES] = {
 int main() {
     stdio_init_all();
     spi_init(SPI_PORT, 2 * 1000 * 1000); // 2 MHz
-    gpio_set_function(PIN_SCK, GPIO_FUNC_SPI); // SCK
-    gpio_set_function(PIN_MOSI, GPIO_FUNC_SPI); // MOSI
+    gpio_set_function(PIN_CLK, GPIO_FUNC_SPI); // SCK
+    gpio_set_function(PIN_DIN, GPIO_FUNC_SPI); // MOSI
 
-    gc9a01_init(SPI_PORT, PIN_MISO, PIN_CS, PIN_SCK, PIN_MOSI, PIN_DC, PIN_RST);
+    gc9a01_init(SPI_PORT, PIN_CS, PIN_CLK, PIN_DIN, PIN_DC, PIN_RST);
     
     for (int i = 0; i < 100; ++i) {
         display_fill(0xFFFF);

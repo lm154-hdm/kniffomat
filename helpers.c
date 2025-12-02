@@ -5,7 +5,6 @@
 #include "helpers.h"
 
 static spi_inst_t* _spi;
-static uint8_t _miso;
 static uint8_t _cs; 
 static uint8_t _sck;
 static uint8_t _mosi;
@@ -45,30 +44,28 @@ void gc9a01_reset(void) {
 
 void gc9a01_set_window(uint16_t x0, uint16_t y0, uint16_t x1, uint16_t y1) {
     // Column address set
-    gc9a01_command(0x2A);
-    gc9a01_data(0x00);
-    gc9a01_data(x0);
-    gc9a01_data(0x00);
-    gc9a01_data(x1 - 1);
-
+    cmd(0x2A);
+    data8(0x00);
+    data8(x0);
+    data8(0x00);
+    data8(x1 - 1);
     // Row address set
-    gc9a01_command(0x2B);
-    gc9a01_data(0x00);
-    gc9a01_data(y0);
-    gc9a01_data(0x00);
-    gc9a01_data(y1 - 1);
+    cmd(0x2B);
+    data8(0x00);
+    data8(y0);
+    data8(0x00);
+    data8(y1 - 1);
 
     // Memory write
-    gc9a01_command(0x2C);
+    cmd(0x2C);
 }
 
 
 // GC9A01 init (basic, common sequence). Adjust MADCTL/COLMOD if needed.
 void gc9a01_init(spi_inst_t* spi,
-                     uint8_t pin_miso, uint8_t pin_cs, uint8_t pin_sck,
+                     uint8_t pin_cs, uint8_t pin_sck,
                      uint8_t pin_mosi, uint8_t pin_dc, uint8_t pin_rst) {
         _spi = spi;
-        _miso = pin_miso;
         _cs   = pin_cs;
         _sck  = pin_sck;
         _mosi = pin_mosi;
