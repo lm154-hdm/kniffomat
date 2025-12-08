@@ -38,7 +38,8 @@ pico_sdk_init()
 add_executable(Kniffel 
     src/main.c 
     src/dice.c     
-    src/helpers.c
+    src/helpers/helpers.c
+    src/helpers/gc9a01.c
 ) 
 
 pico_set_program_name(Kniffel "Kniffel")
@@ -65,6 +66,8 @@ target_link_libraries(Kniffel
         hardware_i2c
         hardware_pio
         hardware_timer
+        hardware_pwm
+        hardware_gpio
         )
 
 pico_add_extra_outputs(Kniffel)

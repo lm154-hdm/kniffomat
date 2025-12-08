@@ -4,8 +4,9 @@
 #include <stdlib.h>
 
 #include "hardware/spi.h"
-#include "helpers.h"
+#include "helpers/helpers.h"
 #include "pico/stdlib.h"
+#include "helpers/gc9a01.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
@@ -57,26 +58,8 @@ int main() {
     gpio_set_dir(PIN_DC, GPIO_OUT);
     gpio_set_dir(PIN_RST, GPIO_OUT);
 
-    // Reset & Display Init
-    gpio_put(PIN_RST, 0);
-    sleep_ms(100);
-    gpio_put(PIN_RST, 1);
-    sleep_ms(100);
-
-    // Sleep Out
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    uint8_t cmd = 0x11;
-    spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
-    sleep_ms(120);
-
-    // Display ON
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    cmd = 0x29;
-    spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
+    gc9a01_init();
+    gc9a01_clear();
 
     // Cubes
     uint16_t cx = SCREEN_W / 2;

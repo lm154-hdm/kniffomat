@@ -11,4 +11,4 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
 void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data,
                             int cube_size, uint16_t color);
 
-#endif  // HELPERS_H
+#endif 

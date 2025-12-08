@@ -1,0 +1,33 @@
+#ifndef GC9A01_H
+#define GC9A01_H
+
+#include <stdint.h>
+#include "hardware/spi.h"
+#include "hardware/gpio.h"
+
+// Display dimensions
+#define GC9A01_WIDTH  240
+#define GC9A01_HEIGHT 240
+
+// Pin definitions
+#define GC9A01_DC_PIN   14
+#define GC9A01_RST_PIN  15
+#define GC9A01_BL_PIN   12
+
+// SPI configuration
+#define GC9A01_SPI_PORT spi0
+#define GC9A01_SPI_SCK  10
+#define GC9A01_SPI_MOSI 11
+#define GC9A01_SPI_CS   13
+
+// Function declarations
+void gc9a01_command(uint8_t cmd);
+void gc9a01_data(uint8_t val);
+void gc9a01_reset(void);
+void gc9a01_init(void);
+void gc9a01_module_init(void);
+void gc9a01_module_exit(void);
+void gc9a01_set_windows(uint8_t x_start, uint8_t y_start, uint8_t x_end, uint8_t y_end);
+void gc9a01_clear(void);
+
+#endif // GC9A01_H
