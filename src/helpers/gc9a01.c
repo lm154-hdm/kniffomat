@@ -6,59 +6,62 @@
 
 // Send command to display
 void gc9a01_command(uint8_t cmd) {
-    gpio_put(GC9A01_DC_PIN, 0);  // Command mode (DC low)
-    spi_write_blocking(GC9A01_SPI_PORT, &cmd, 1);
+    gpio_put(DC_PIN, 0);  // Command mode (DC low)
+    spi_write_blocking(SPI_PORT, &cmd, 1);
 }
 
 // Send data to display
 void gc9a01_data(uint8_t val) {
-    gpio_put(GC9A01_DC_PIN, 1);  // Data mode (DC high)
-    spi_write_blocking(GC9A01_SPI_PORT, &val, 1);
+    gpio_put(DC_PIN, 1);  // Data mode (DC high)
+    spi_write_blocking(SPI_PORT, &val, 1);
 }
 
 // Reset the display
 void gc9a01_reset(void) {
-    gpio_put(GC9A01_RST_PIN, 1);
+    gpio_put(RST_PIN, 1);
     sleep_ms(10);
-    gpio_put(GC9A01_RST_PIN, 0);
+    gpio_put(RST_PIN, 0);
     sleep_ms(10);
-    gpio_put(GC9A01_RST_PIN, 1);
+    gpio_put(RST_PIN, 1);
     sleep_ms(10);
 }
 
 // Initialize module hardware (GPIO, SPI, PWM)
 void gc9a01_module_init(void) {
     // Initialize GPIO pins
-    gpio_init(GC9A01_RST_PIN);
-    gpio_set_dir(GC9A01_RST_PIN, GPIO_OUT);
+    gpio_init(RST_PIN);
+    gpio_set_dir(RST_PIN, GPIO_OUT);
     
-    gpio_init(GC9A01_DC_PIN);
-    gpio_set_dir(GC9A01_DC_PIN, GPIO_OUT);
+    gpio_init(DC_PIN);
+    gpio_set_dir(DC_PIN, GPIO_OUT);
     
-    gpio_init(GC9A01_BL_PIN);
-    gpio_set_dir(GC9A01_BL_PIN, GPIO_OUT);
+    gpio_init(BL_PIN);
+    gpio_set_dir(BL_PIN, GPIO_OUT);
     
     // Set up PWM for backlight
-    gpio_set_function(GC9A01_BL_PIN, GPIO_FUNC_PWM);
-    uint slice_num = pwm_gpio_to_slice_num(GC9A01_BL_PIN);
+    gpio_set_function(BL_PIN, GPIO_FUNC_PWM);
+    uint slice_num = pwm_gpio_to_slice_num(BL_PIN);
     pwm_set_wrap(slice_num, 100);
     pwm_set_chan_level(slice_num, PWM_CHAN_A, 100);  // 100% brightness
     pwm_set_enabled(slice_num, true);
     
     // Initialize SPI
-    spi_init(GC9A01_SPI_PORT, 40000000);  // 40 MHz
-    gpio_set_function(GC9A01_SPI_SCK, GPIO_FUNC_SPI);
-    gpio_set_function(GC9A01_SPI_MOSI, GPIO_FUNC_SPI);
-    gpio_set_function(GC9A01_SPI_CS, GPIO_FUNC_SPI);
+    spi_init(SPI_PORT, 40000000);  // 40 MHz
+    spi_set_format(SPI_PORT, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+    gpio_set_function(SPI_SCK, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_MOSI, GPIO_FUNC_SPI);
+    gpio_set_function(SPI_CS, GPIO_FUNC_SPI);
     
     // Set SPI format
-    spi_set_format(GC9A01_SPI_PORT, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
+    spi_set_format(SPI_PORT, 8, SPI_CPOL_0, SPI_CPHA_0, SPI_MSB_FIRST);
 }
 
 // Initialize display with exact sequence from Python code
 void gc9a01_init(void) {
     gc9a01_module_init();
     gc9a01_reset();
+
+    sleep_ms(120);
     
     gc9a01_command(0xEF);
     gc9a01_command(0xEB);
@@ -208,7 +211,8 @@ void gc9a01_init(void) {
     gc9a01_data(0x03);
     
     gc9a01_command(0xE8);
-    gc9a01_data(0x34);
+    gc9a01_data(0x40);
+    gc9a01_data(0x8A);
     
     gc9a01_command(0x62);
     gc9a01_data(0x18);
@@ -284,12 +288,13 @@ void gc9a01_init(void) {
     gc9a01_data(0x3E);
     gc9a01_data(0x07);
     
-    gc9a01_command(0x35);
-    gc9a01_command(0x21);
+    gc9a01_command(0x35);  // Tearing effect line on
     
-    gc9a01_command(0x11);
+    gc9a01_command(0x21);  // Display inversion on
+    
+    gc9a01_command(0x11);// Exit Sleep mode
     sleep_ms(120);
-    gc9a01_command(0x29);
+    gc9a01_command(0x29);// Turn Display on
     sleep_ms(20);
 }
 
@@ -315,7 +320,7 @@ void gc9a01_set_windows(uint8_t x_start, uint8_t y_start, uint8_t x_end, uint8_t
 // Clear display to white
 void gc9a01_clear(void) {
     gc9a01_set_windows(0, 0, GC9A01_WIDTH, GC9A01_HEIGHT);
-    gpio_put(GC9A01_DC_PIN, 1);  // Data mode
+    gpio_put(DC_PIN, 1);  // Data mode
     
     uint8_t white_buffer[4096];
     for (int i = 0; i < 4096; i++) {
@@ -326,23 +331,23 @@ void gc9a01_clear(void) {
     
     for (uint32_t i = 0; i < total_bytes; i += 4096) {
         uint32_t chunk_size = (total_bytes - i) < 4096 ? (total_bytes - i) : 4096;
-        spi_write_blocking(GC9A01_SPI_PORT, white_buffer, chunk_size);
+        spi_write_blocking(SPI_PORT, white_buffer, chunk_size);
     }
 }
 
 // Clean up and exit
 void gc9a01_module_exit(void) {
     // Turn off backlight
-    uint slice_num = pwm_gpio_to_slice_num(GC9A01_BL_PIN);
+    uint slice_num = pwm_gpio_to_slice_num(BL_PIN);
     pwm_set_enabled(slice_num, false);
     
     // Reset pins to safe state
-    gpio_put(GC9A01_RST_PIN, 1);
-    gpio_put(GC9A01_DC_PIN, 0);
-    gpio_put(GC9A01_BL_PIN, 1);
+    gpio_put(RST_PIN, 1);
+    gpio_put(DC_PIN, 0);
+    gpio_put(BL_PIN, 1);
     
     sleep_ms(1);
     
     // Deinitialize SPI
-    spi_deinit(GC9A01_SPI_PORT);
+    spi_deinit(SPI_PORT);
 }

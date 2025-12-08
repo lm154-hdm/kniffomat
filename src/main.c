@@ -11,16 +11,6 @@
 // Constants
 #define M_PI 3.14159265358979323846
 
-// Pins
-#define PIN_MISO 12
-#define PIN_CS 13
-#define PIN_SCK 10
-#define PIN_MOSI 11
-#define PIN_DC 14
-#define PIN_RST 15
-
-spi_inst_t *SPI_PORT = spi1;
-
 // Screensize
 #define SCREEN_W 240
 #define SCREEN_H 240
@@ -46,17 +36,6 @@ static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_byt
 
 int main() {
     stdio_init_all();
-    spi_init(SPI_PORT, 10 * 1000 * 1000);  // 10 MHz
-    gpio_set_function(10, GPIO_FUNC_SPI);  // SCK
-    gpio_set_function(11, GPIO_FUNC_SPI);  // MOSI
-
-    // Pins
-    gpio_init(PIN_CS);
-    gpio_init(PIN_DC);
-    gpio_init(PIN_RST);
-    gpio_set_dir(PIN_CS, GPIO_OUT);
-    gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_set_dir(PIN_RST, GPIO_OUT);
 
     gc9a01_init();
     gc9a01_clear();
