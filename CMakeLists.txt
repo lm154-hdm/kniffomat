@@ -38,6 +38,7 @@ pico_sdk_init()
 add_executable(Kniffel 
     src/main.c 
     src/dice.c     
+    src/fox.c
     src/helpers/helpers.c
     src/helpers/gc9a01.c
 ) 

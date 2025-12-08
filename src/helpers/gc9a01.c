@@ -111,10 +111,10 @@ void gc9a01_init(void) {
     
     gc9a01_command(0xB6);
     gc9a01_data(0x00);
-    gc9a01_data(0x20);
+    gc9a01_data(0x00);
     
-    gc9a01_command(0x36);
-    gc9a01_data(0x08);
+    gc9a01_command(0x36); // Memory Access Control
+    gc9a01_data(0x68);
     
     gc9a01_command(0x3A);
     gc9a01_data(0x05);
@@ -299,27 +299,27 @@ void gc9a01_init(void) {
 }
 
 // Set display window for drawing
-void gc9a01_set_windows(uint8_t x_start, uint8_t y_start, uint8_t x_end, uint8_t y_end) {
+void gc9a01_set_windows(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end) {
     // Set the X coordinates
     gc9a01_command(0x2A);
-    gc9a01_data(0x00);           // High byte of start X
-    gc9a01_data(x_start);        // Low byte of start X
-    gc9a01_data(0x00);           // High byte of end X
-    gc9a01_data(x_end - 1);      // Low byte of end X
+    gc9a01_data(x_start >> 8);
+    gc9a01_data(x_start & 0xFF);
+    gc9a01_data(x_end >> 8);
+    gc9a01_data(x_end & 0xFF);
     
     // Set the Y coordinates
     gc9a01_command(0x2B);
-    gc9a01_data(0x00);           // High byte of start Y
-    gc9a01_data(y_start);        // Low byte of start Y
-    gc9a01_data(0x00);           // High byte of end Y
-    gc9a01_data(y_end - 1);      // Low byte of end Y
+    gc9a01_data(y_start >> 8);
+    gc9a01_data(y_start & 0xFF);
+    gc9a01_data(y_end >> 8);
+    gc9a01_data(y_end & 0xFF);
     
-    gc9a01_command(0x2C);        // Write to RAM
+    gc9a01_command(0x2C);
 }
 
 // Clear display to white
 void gc9a01_clear(void) {
-    gc9a01_set_windows(0, 0, GC9A01_WIDTH, GC9A01_HEIGHT);
+    gc9a01_set_windows(0, 0, GC9A01_WIDTH - 1, GC9A01_HEIGHT - 1);
     gpio_put(DC_PIN, 1);  // Data mode
     
     uint8_t white_buffer[4096];

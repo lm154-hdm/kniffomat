@@ -22,6 +22,9 @@
 #define OFFSET 8
 #define NUM_CUBES 6
 
+//Fox Test
+extern const uint8_t fox_bytes[];
+
 // Bitmap dice data
 extern const uint8_t dice1_bytes[480];
 extern const uint8_t dice2_bytes[480];
@@ -38,6 +41,29 @@ int main() {
     stdio_init_all();
 
     gc9a01_init();
+    
+    // TEST: Fill entire screen with a solid color
+    gc9a01_set_windows(0, 0, 239, 239);
+    gpio_put(DC_PIN, 1);  // Data mode
+    
+    // Draw red screen (RGB565: 0xF800)
+    uint8_t red[2] = {0xF8, 0x00};
+    for (int i = 0; i < 240 * 240; i++) {
+        spi_write_blocking(SPI_PORT, red, 2);
+    }
+    
+    sleep_ms(2000);
+
+    // Draw green screen (RGB565: 0x07E0)
+    uint8_t green[2] = {0x07, 0xE0};
+    gc9a01_set_windows(0, 0, 239, 239);
+    gpio_put(DC_PIN, 1);
+    for (int i = 0; i < 240 * 240; i++) {
+        spi_write_blocking(SPI_PORT, green, 2);
+    }
+    
+    sleep_ms(2000);
+    
     gc9a01_clear();
 
     // Cubes
@@ -102,6 +128,9 @@ int main() {
 
         draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
     }
+
+    sleep_ms(2000);
+    draw_packed_bitmap(SPI_PORT, 0, 0, fox_bytes, CUBE_SIZE, 0xFFFF);
 
     while (true) {
         tight_loop_contents();
