@@ -18,8 +18,6 @@ void gc9a01_data(uint8_t val) {
 
 // Reset the display
 void gc9a01_reset(void) {
-    //gpio_put(RST_PIN, 1);
-    //sleep_ms(10);
     gpio_put(RST_PIN, 0);
     sleep_ms(10);
     gpio_put(RST_PIN, 1);
@@ -28,7 +26,6 @@ void gc9a01_reset(void) {
 
 // Initialize module hardware (GPIO, SPI, PWM)
 void gc9a01_module_init(void) {
-    // Initialize GPIO pins
     gpio_init(DC_PIN);
     gpio_set_dir(DC_PIN, GPIO_OUT);
 
@@ -38,13 +35,6 @@ void gc9a01_module_init(void) {
     gpio_init(SPI_CS);
     gpio_set_dir(SPI_CS, GPIO_OUT);
     gpio_put(SPI_CS, 1);
-    
-    // Has no impact
-    //gpio_set_function(BL_PIN, GPIO_FUNC_PWM);
-    //uint slice_num = pwm_gpio_to_slice_num(BL_PIN);
-    //pwm_set_wrap(slice_num, 100);
-    //pwm_set_chan_level(slice_num, PWM_CHAN_A, 100);  // 100% brightness
-    //pwm_set_enabled(slice_num, true);
     
     // Initialize SPI
     spi_init(SPI_PORT, 40000000);  // 40 MHz
@@ -87,7 +77,7 @@ void gc9a01_init(void) {
     gc9a01_command(0xEB);
     gc9a01_data(0x14);
     
-    gc9a01_command(0xFE); // Enable Registers
+    gc9a01_command(0xFE);   // Enable Registers
     gc9a01_command(0xEF);
     
     gc9a01_command(0xEB);
@@ -115,8 +105,8 @@ void gc9a01_init(void) {
     gc9a01_data(0x00);
     gc9a01_data(0x20);
     
-    gc9a01_command(0x36); // Memory Access Control
-    gc9a01_data(0x08); // MX, MY, MV, ML, BGR, MH
+    gc9a01_command(0x36);   // Memory Access Control
+    gc9a01_data(0x08);      // MX, MY, MV, ML, BGR, MH
     
     gc9a01_command(0x3A);
     gc9a01_data(0x05);
@@ -290,30 +280,28 @@ void gc9a01_init(void) {
     gc9a01_data(0x3E);
     gc9a01_data(0x07);
     
-    gc9a01_command(0x35);  // Tearing effect line on
-    gc9a01_command(0x21);  // Display inversion on
+    gc9a01_command(0x35);   // Tearing effect line on
+    gc9a01_command(0x21);   // Display inversion on
     
-    gc9a01_command(0x11);// Exit Sleep mode
+    gc9a01_command(0x11);   // Exit Sleep mode
     sleep_ms(120);
-    gc9a01_command(0x29);// Turn Display on
+    gc9a01_command(0x29);   // Turn Display on
     sleep_ms(20);
 }
 
 // Set display window for drawing
 void gc9a01_set_windows(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint16_t y_end) {
-    // Python passes width/height directly, NOT (width-1)/(height-1)
     gc9a01_command(0x2A);
     gc9a01_data(0x00);              // High byte = 0x00 
     gc9a01_data(x_start & 0xFF);    // Low byte only
     gc9a01_data(0x00);              // High byte = 0x00 
-    gc9a01_data(x_end & 0xFF); // Low byte only, subtract 1
+    gc9a01_data(x_end & 0xFF);      // Low byte 
     
-    // Set the Y coordinates (Row Address Set)
     gc9a01_command(0x2B);
     gc9a01_data(0x00);              // High byte = 0x00 
     gc9a01_data(y_start & 0xFF);    // Low byte only
     gc9a01_data(0x00);              // High byte = 0x00 
-    gc9a01_data(y_end & 0xFF); // Low byte only, subtract 1 
+    gc9a01_data(y_end & 0xFF);      // Low byte 
     
     gc9a01_command(0x2C);  // Memory Write
 }
