@@ -1,8 +1,8 @@
-#include "helpers.h"
-
 #include <stdlib.h>
-
 #include "pico/stdlib.h"
+
+#include "helpers.h"
+#include "gc9a01.h"
 
 #define PIN_MISO 12
 #define PIN_CS 13
@@ -19,35 +19,6 @@
 //     }
 // }
 
-static void tft_set_window(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, uint16_t x1,
-                           uint16_t y1) {
-    uint8_t data[4];
-    // Column Address Set
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);  // Command
-    uint8_t cmd = 0x2A;   // Column Address
-    spi_write_blocking(spi_port, &cmd, 1);
-    gpio_put(PIN_DC, 1);  // Data
-    data[0] = (x0 >> 8) & 0xFF;
-    data[1] = x0 & 0xFF;
-    data[2] = (x1 >> 8) & 0xFF;
-    data[3] = x1 & 0xFF;
-    spi_write_blocking(spi_port, data, 4);
-    gpio_put(PIN_CS, 1);
-    // Row Address Set
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    cmd = 0x2B;
-    spi_write_blocking(spi_port, &cmd, 1);
-    gpio_put(PIN_DC, 1);
-    data[0] = (y0 >> 8) & 0xFF;
-    data[1] = y0 & 0xFF;
-    data[2] = (y1 >> 8) & 0xFF;
-    data[3] = y1 & 0xFF;
-    spi_write_blocking(spi_port, data, 4);
-    gpio_put(PIN_CS, 1);
-}
-
 void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const uint8_t *data,
                         int cube_size, uint16_t color) {
     int w = cube_size;
@@ -55,7 +26,7 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
     int bytes_per_row = (w + 7) / 8;
     uint8_t col_hi = (color >> 8) & 0xFF;
     uint8_t col_lo = color & 0xFF;
-    tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
+    gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
@@ -92,7 +63,7 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
     int bytes_per_row = (w + 7) / 8;
     // uint8_t col_hi = (color >> 8) & 0xFF;
     // uint8_t col_lo = color & 0xFF;
-    tft_set_window(spi_port, x0, y0, x0 + w - 1, y0 + h - 1);
+    gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR

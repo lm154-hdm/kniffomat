@@ -4,21 +4,12 @@
 #include <stdlib.h>
 
 #include "hardware/spi.h"
-#include "helpers.h"
+#include "helpers/helpers.h"
 #include "pico/stdlib.h"
+#include "helpers/gc9a01.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
-
-// Pins
-#define PIN_MISO 12
-#define PIN_CS 13
-#define PIN_SCK 10
-#define PIN_MOSI 11
-#define PIN_DC 14
-#define PIN_RST 15
-
-spi_inst_t *SPI_PORT = spi1;
 
 // Screensize
 #define SCREEN_W 240
@@ -30,6 +21,9 @@ spi_inst_t *SPI_PORT = spi1;
 #define POINT_SIZE 8
 #define OFFSET 8
 #define NUM_CUBES 6
+
+//Fox Test
+extern const uint8_t fox_bytes[];
 
 // Bitmap dice data
 extern const uint8_t dice1_bytes[480];
@@ -45,38 +39,17 @@ static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_byt
 
 int main() {
     stdio_init_all();
-    spi_init(SPI_PORT, 10 * 1000 * 1000);  // 10 MHz
-    gpio_set_function(10, GPIO_FUNC_SPI);  // SCK
-    gpio_set_function(11, GPIO_FUNC_SPI);  // MOSI
-
-    // Pins
-    gpio_init(PIN_CS);
-    gpio_init(PIN_DC);
-    gpio_init(PIN_RST);
-    gpio_set_dir(PIN_CS, GPIO_OUT);
-    gpio_set_dir(PIN_DC, GPIO_OUT);
-    gpio_set_dir(PIN_RST, GPIO_OUT);
-
-    // Reset & Display Init
-    gpio_put(PIN_RST, 0);
-    sleep_ms(100);
-    gpio_put(PIN_RST, 1);
-    sleep_ms(100);
-
-    // Sleep Out
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    uint8_t cmd = 0x11;
-    spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
-    sleep_ms(120);
-
-    // Display ON
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    cmd = 0x29;
-    spi_write_blocking(SPI_PORT, &cmd, 1);
-    gpio_put(PIN_CS, 1);
+    gc9a01_init();
+    
+    // Draw green screen
+    uint8_t green[2] = {0x07, 0xE0};
+    gc9a01_set_windows(0, 0, 239, 239);
+    gpio_put(DC_PIN, 1);
+    for (int i = 0; i < 240 * 240; i++) {
+        spi_write_blocking(SPI_PORT, green, 2);
+    }
+    sleep_ms(2000);
+    gc9a01_clear();
 
     // Cubes
     uint16_t cx = SCREEN_W / 2;
@@ -140,6 +113,10 @@ int main() {
 
         draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
     }
+
+    sleep_ms(2000);
+    //Draw Fox Test
+    draw_packed_bitmap(SPI_PORT, 0, 0, fox_bytes, 240, 0xFFFF);
 
     while (true) {
         tight_loop_contents();
