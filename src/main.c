@@ -115,7 +115,8 @@ int main() {
     }
 
     sleep_ms(2000);
-    draw_packed_bitmap(SPI_PORT, 0, 0, fox_bytes, CUBE_SIZE, 0xFFFF);
+    //Draw Fox Test
+    draw_packed_bitmap(SPI_PORT, 0, 0, fox_bytes, 240, 0xFFFF);
 
     while (true) {
         tight_loop_contents();
