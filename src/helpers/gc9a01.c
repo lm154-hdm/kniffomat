@@ -318,21 +318,21 @@ void gc9a01_set_windows(uint16_t x_start, uint16_t y_start, uint16_t x_end, uint
     gc9a01_command(0x2C);  // Memory Write
 }
 
-// Clear display to white
+// Clear display to black
 void gc9a01_clear(void) {
     gc9a01_set_windows(0, 0, GC9A01_WIDTH, GC9A01_HEIGHT);
     gpio_put(DC_PIN, 1);
     
-    uint8_t white_buffer[4096];
+    uint8_t black_buffer[4096];
     for (int i = 0; i < 4096; i++) {
-        white_buffer[i] = 0xFF;
+        black_buffer[i] = 0x00;
     }
     
     uint32_t total_bytes = GC9A01_WIDTH * GC9A01_HEIGHT * 2;
     
     for (uint32_t i = 0; i < total_bytes; i += 4096) {
         uint32_t chunk_size = (total_bytes - i) < 4096 ? (total_bytes - i) : 4096;
-        spi_write_blocking(SPI_PORT, white_buffer, chunk_size);
+        spi_write_blocking(SPI_PORT, black_buffer, chunk_size);
     }
 }
 
