@@ -39,31 +39,16 @@ static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_byt
 
 int main() {
     stdio_init_all();
-
     gc9a01_init();
     
-    // TEST: Fill entire screen with a solid color
-    gc9a01_set_windows(0, 0, 239, 239);
-    gpio_put(DC_PIN, 1);  // Data mode
-    
-    // Draw red screen (RGB565: 0xF800)
-    uint8_t red[2] = {0xF8, 0x00};
-    for (int i = 0; i < 240 * 240; i++) {
-        spi_write_blocking(SPI_PORT, red, 2);
-    }
-    
-    sleep_ms(2000);
-
-    // Draw green screen (RGB565: 0x07E0)
+    // Draw green screen
     uint8_t green[2] = {0x07, 0xE0};
     gc9a01_set_windows(0, 0, 239, 239);
     gpio_put(DC_PIN, 1);
     for (int i = 0; i < 240 * 240; i++) {
         spi_write_blocking(SPI_PORT, green, 2);
     }
-    
     sleep_ms(2000);
-    
     gc9a01_clear();
 
     // Cubes
