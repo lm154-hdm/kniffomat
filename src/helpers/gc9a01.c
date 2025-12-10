@@ -324,19 +324,19 @@ void gc9a01_clear(void) {
     }
 }
 
-// Clean up and exit
-void gc9a01_module_exit(void) {
-    // Turn off backlight
-    uint slice_num = pwm_gpio_to_slice_num(BL_PIN);
-    pwm_set_enabled(slice_num, false);
-    
-    // Reset pins to safe state
-    gpio_put(RST_PIN, 1);
-    gpio_put(DC_PIN, 0);
-    gpio_put(BL_PIN, 1);
-    
-    sleep_ms(1);
-    
-    // Deinitialize SPI
-    spi_deinit(SPI_PORT);
-}
+// uncomment unused function
+//void gc9a01_module_exit(void) {
+//    // Turn off backlight
+//    uint slice_num = pwm_gpio_to_slice_num(BL_PIN);
+//    pwm_set_enabled(slice_num, false);
+//    
+//    // Reset pins to safe state
+//    gpio_put(RST_PIN, 1);
+//    gpio_put(DC_PIN, 0);
+//    gpio_put(BL_PIN, 1);
+//    
+//    sleep_ms(1);
+//    
+//    // Deinitialize SPI
+//    spi_deinit(SPI_PORT);
+//}
