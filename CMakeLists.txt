@@ -41,6 +41,7 @@ add_executable(Kniffel
     src/fox.c
     src/helpers/helpers.c
     src/helpers/gc9a01.c
+    src/helpers/accelerometer_init.c
 ) 
 
 pico_set_program_name(Kniffel "Kniffel")
@@ -51,7 +52,7 @@ pico_generate_pio_header(Kniffel ${CMAKE_CURRENT_LIST_DIR}/blink.pio)
 
 # Modify the below lines to enable/disable output over UART/USB
 pico_enable_stdio_uart(Kniffel 0)
-pico_enable_stdio_usb(Kniffel 0)
+pico_enable_stdio_usb(Kniffel 1)
 # Add the standard library to the build
 target_link_libraries(Kniffel
         pico_stdlib)

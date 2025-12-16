@@ -4,9 +4,11 @@
 #include <stdlib.h>
 
 #include "hardware/spi.h"
+#include "hardware/i2c.h"
 #include "helpers/helpers.h"
 #include "pico/stdlib.h"
 #include "helpers/gc9a01.h"
+#include "helpers/accelerometer_init.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
@@ -37,9 +39,18 @@ extern const uint8_t dice_clear_bytes[480];
 static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
                                              dice4_bytes, dice5_bytes, dice6_bytes};
 
+// Accelerometer Connecting
+#define ACCELEROMETER_BUS_PORT i2c0
+static int accelerometer_address = 0x68;
+static int accelerometer_sda = 0;
+static int accelerometer_scl = 1;
+
 int main() {
-    stdio_init_all();
+    stdio_init_all(); // neccessary for USB serial monitoring
     gc9a01_init();
+
+    // Initialize Accelerometer
+    accelerometer_init(accelerometer_address, accelerometer_sda, accelerometer_scl);
     
     // Draw green screen
     uint8_t green[2] = {0x07, 0xE0};
