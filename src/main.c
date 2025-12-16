@@ -14,6 +14,7 @@
 #define NUM_CUBES 6
 
 // Lock Buttons
+#define PIN_BUTTON 16
 #define PIN_BUTTON_1 7
 #define PIN_BUTTON_2 6
 #define PIN_BUTTON_3 28
@@ -216,7 +217,8 @@ void roll_dice() {
 int main() {
     stdio_init_all();
     gc9a01_init();
-
+    gc9a01_clear();
+    
     // Buttons
     init_button(PIN_BUTTON);
     init_button(PIN_BUTTON_1);
@@ -243,8 +245,12 @@ int main() {
         cube_positions[i].y = draw_y;
     }
 
+    gpio_init(PICO_DEFAULT_LED_PIN);
+    gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
+
     while (1) {
         if (button_pressed(PIN_BUTTON)) {
+            gpio_put(PICO_DEFAULT_LED_PIN, 1);
             roll_dice();
             first_roll = true;
 
@@ -254,6 +260,7 @@ int main() {
         }
 
         handle_locking();
+        gpio_put(PICO_DEFAULT_LED_PIN, 0);
 
         sleep_ms(10);
     }
