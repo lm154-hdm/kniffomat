@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 #include "hardware/spi.h"
+#include "helpers/gc9a01.h"
 #include "helpers/helpers.h"
 #include "pico/stdlib.h"
-#include "helpers/gc9a01.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
@@ -20,14 +20,8 @@
 #define PIN_BUTTON_4 27
 #define PIN_BUTTON_5 26
 #define PIN_BUTTON_6 22
-uint dice_buttons[NUM_CUBES] = {
-    PIN_BUTTON_1,
-    PIN_BUTTON_2,
-    PIN_BUTTON_3,
-    PIN_BUTTON_4,
-    PIN_BUTTON_5,
-    PIN_BUTTON_6
-};
+uint dice_buttons[NUM_CUBES] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
+                                PIN_BUTTON_4, PIN_BUTTON_5, PIN_BUTTON_6};
 
 // Screensize
 #define SCREEN_W 240
@@ -63,22 +57,15 @@ bool lock_dice_3 = false;
 bool lock_dice_4 = false;
 bool lock_dice_5 = false;
 bool lock_dice_6 = false;
-bool lock_dice[NUM_CUBES] = { false, false, false, false, false, false };
-#define LONG_PRESS_TIME 600 // ms
+bool lock_dice[NUM_CUBES] = {false, false, false, false, false, false};
+#define LONG_PRESS_TIME 600  // ms
 uint64_t press_start_time[NUM_CUBES] = {0};
 bool last_press_state[NUM_CUBES] = {0};
-typedef enum {
-    NO_PRESS,
-    SHORT_PRESS,
-    LONG_PRESS
-} PressType;
+typedef enum { NO_PRESS, SHORT_PRESS, LONG_PRESS } PressType;
 uint8_t rolled[NUM_CUBES];
 
-
-static const uint8_t *dice_arr[NUM_CUBES] = {
-    dice1_bytes, dice2_bytes, dice3_bytes,
-    dice4_bytes, dice5_bytes, dice6_bytes
-};
+static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
+                                             dice4_bytes, dice5_bytes, dice6_bytes};
 
 void init_button(uint pin) {
     gpio_init(pin);
@@ -88,8 +75,8 @@ void init_button(uint pin) {
 
 bool button_pressed(uint pin) {
     if (gpio_get(pin)) {
-        sleep_ms(20);  // wait
-        return gpio_get(pin); // check again
+        sleep_ms(20);          // wait
+        return gpio_get(pin);  // check again
     }
     return false;
 }
@@ -130,22 +117,24 @@ void handle_locking() {
             uint16_t draw_x = cube_positions[i].x;
             uint16_t draw_y = cube_positions[i].y;
 
-            if (!lock_dice[i]){
-              draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
-            }
-            else {
-              draw_bitmap_with_background(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF, 0xF800);
+            if (!lock_dice[i]) {
+                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE,
+                                   0xFFFF);
+            } else {
+                draw_bitmap_with_background(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1],
+                                            CUBE_SIZE, 0xFFFF, 0xF800);
             }
             printf("Dice %d %s\n", i + 1, lock_dice[i] ? "locked" : "unlocked");
             while (gpio_get(dice_buttons[i])) sleep_ms(10);
         }
 
         if (result == LONG_PRESS) {
-            for (int j = 0; j < NUM_CUBES; j++){
+            for (int j = 0; j < NUM_CUBES; j++) {
                 lock_dice[j] = false;
                 uint16_t draw_x = cube_positions[j].x;
                 uint16_t draw_y = cube_positions[j].y;
-                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], CUBE_SIZE, 0xFFFF);
+                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], CUBE_SIZE,
+                                   0xFFFF);
             }
             printf("All dice unlocked\n");
             while (gpio_get(dice_buttons[i])) sleep_ms(10);
@@ -154,44 +143,44 @@ void handle_locking() {
 }
 
 void roll_dice() {
-
     // Reset screen
     for (int i = 0; i < NUM_CUBES; i++) {
-            // Don't reset the locked buttons
-            if (!lock_dice[i]){
+        // Don't reset the locked buttons
+        if (!lock_dice[i]) {
+            uint16_t draw_x = cube_positions[i].x;
+            uint16_t draw_y = cube_positions[i].y;
 
-              uint16_t draw_x = cube_positions[i].x;
-              uint16_t draw_y = cube_positions[i].y;
-          
-              draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
-            }
+            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
         }
+    }
     sleep_ms(300);
 
     // Animation
-    uint32_t seed = (uint32_t) to_us_since_boot(get_absolute_time());
+    uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_CUBES];
     for (int t = 0; t < 2; t++) {
         // Generate random dice for animation
         for (int i = 0; i < NUM_CUBES; i++) {
             seed = seed * 1664525 + 17;
-            anim[i] = (seed % 6) + 1; // 1-6
+            anim[i] = (seed % 6) + 1;  // 1-6
         }
         // Draw the random dice
         for (int i = 0; i < NUM_CUBES; i++) {
-            if (!lock_dice[i]){
-              uint16_t draw_x = cube_positions[i].x;
-              uint16_t draw_y = cube_positions[i].y;
+            if (!lock_dice[i]) {
+                uint16_t draw_x = cube_positions[i].x;
+                uint16_t draw_y = cube_positions[i].y;
 
-              draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE, 0xFFFF);
+                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE,
+                                       0xFFFF);
             }
         }
         sleep_ms(1000);
         for (int i = 0; i < NUM_CUBES; i++) {
-            if (!lock_dice[i]){
-              uint16_t draw_x = cube_positions[i].x;
-              uint16_t draw_y = cube_positions[i].y;
-              draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
+            if (!lock_dice[i]) {
+                uint16_t draw_x = cube_positions[i].x;
+                uint16_t draw_y = cube_positions[i].y;
+                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE,
+                                       0xFFFF);
             }
         }
         sleep_ms(500);
@@ -201,10 +190,10 @@ void roll_dice() {
     // true randomness is not possible but can be noise detected from unused pins
     // adc_read()
     for (int i = 0; i < NUM_CUBES; i++) {
-      if (!lock_dice[i]){
-        seed = seed * 1664525 + 1013904223;
-        rolled[i] = (seed % 6) + 1; // 1-6
-      }
+        if (!lock_dice[i]) {
+            seed = seed * 1664525 + 1013904223;
+            rolled[i] = (seed % 6) + 1;  // 1-6
+        }
     }
     printf("Rolled dice: ");
     for (int i = 0; i < NUM_CUBES; i++) {
@@ -214,11 +203,12 @@ void roll_dice() {
 
     // Draw the rolled dice in a concentric radial pattern
     for (int i = 0; i < NUM_CUBES; i++) {
-        if (!lock_dice[i]){
-          uint16_t draw_x = cube_positions[i].x;
-          uint16_t draw_y = cube_positions[i].y;
+        if (!lock_dice[i]) {
+            uint16_t draw_x = cube_positions[i].x;
+            uint16_t draw_y = cube_positions[i].y;
 
-          draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE, 0xFFFF);
+            draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE,
+                               0xFFFF);
         }
     }
 }
@@ -226,7 +216,7 @@ void roll_dice() {
 int main() {
     stdio_init_all();
     gc9a01_init();
-    
+
     // Buttons
     init_button(PIN_BUTTON);
     init_button(PIN_BUTTON_1);
@@ -242,20 +232,18 @@ int main() {
     uint16_t cy = SCREEN_H / 2;
 
     for (int i = 0; i < NUM_CUBES; i++) {
-      float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
-      float x = cx + RADIUS * cosf(theta);
-      float y = cy + RADIUS * sinf(theta);
+        float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+        float x = cx + RADIUS * cosf(theta);
+        float y = cy + RADIUS * sinf(theta);
 
-      uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
-      uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+        uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
+        uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
 
-      cube_positions[i].x = draw_x;
-      cube_positions[i].y = draw_y;
+        cube_positions[i].x = draw_x;
+        cube_positions[i].y = draw_y;
     }
 
-
     while (1) {
-
         if (button_pressed(PIN_BUTTON)) {
             roll_dice();
             first_roll = true;
@@ -270,5 +258,7 @@ int main() {
         sleep_ms(10);
     }
 
-    while (true) { tight_loop_contents(); }
+    while (true) {
+        tight_loop_contents();
+    }
 }

@@ -1,8 +1,9 @@
-#include <stdlib.h>
-#include "pico/stdlib.h"
-
 #include "helpers.h"
+
+#include <stdlib.h>
+
 #include "gc9a01.h"
+#include "pico/stdlib.h"
 
 #define PIN_MISO 12
 #define PIN_CS 13
@@ -88,30 +89,26 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
     gpio_put(PIN_CS, 1);
 }
 
-void draw_bitmap_with_background(
-    spi_inst_t *spi_port,
-    uint16_t x0,
-    uint16_t y0,
-    const uint8_t *data,
-    int cube_size,
-    uint16_t fg_color,    // Farbe für Pixel 1
-    uint16_t bg_color     // Farbe für Pixel 0 
+void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
+                                 const uint8_t *data, int cube_size,
+                                 uint16_t fg_color,  // Farbe für Pixel 1
+                                 uint16_t bg_color   // Farbe für Pixel 0
 ) {
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
 
-    uint8_t fg_hi = fg_color & 0xFF;       // LOW
-    uint8_t fg_lo = (fg_color >> 8) & 0xFF; // HIGH
+    uint8_t fg_hi = fg_color & 0xFF;         // LOW
+    uint8_t fg_lo = (fg_color >> 8) & 0xFF;  // HIGH
 
-    uint8_t bg_hi = bg_color & 0xFF;       
+    uint8_t bg_hi = bg_color & 0xFF;
     uint8_t bg_lo = (bg_color >> 8) & 0xFF;
 
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
 
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
-    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1); // RAMWR command
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR command
     gpio_put(PIN_DC, 1);
 
     uint8_t *rowbuf = malloc(2 * w);
@@ -126,10 +123,10 @@ void draw_bitmap_with_background(
                 if (bx >= w) break;
 
                 if (b & (1 << bit)) {
-                    rowbuf[bx * 2]     = fg_hi;
+                    rowbuf[bx * 2] = fg_hi;
                     rowbuf[bx * 2 + 1] = fg_lo;
                 } else {
-                    rowbuf[bx * 2]     = bg_hi;
+                    rowbuf[bx * 2] = bg_hi;
                     rowbuf[bx * 2 + 1] = bg_lo;
                 }
                 bx++;
