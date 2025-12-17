@@ -218,7 +218,7 @@ int main() {
     stdio_init_all();
     gc9a01_init();
     gc9a01_clear();
-    
+
     // Buttons
     init_button(PIN_BUTTON);
     init_button(PIN_BUTTON_1);
