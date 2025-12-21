@@ -1,8 +1,9 @@
-#include <stdlib.h>
-#include "pico/stdlib.h"
-
 #include "helpers.h"
+
+#include <stdlib.h>
+
 #include "gc9a01.h"
+#include "pico/stdlib.h"
 
 #define PIN_MISO 12
 #define PIN_CS 13

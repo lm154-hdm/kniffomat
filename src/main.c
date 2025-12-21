@@ -4,9 +4,9 @@
 #include <stdlib.h>
 
 #include "hardware/spi.h"
+#include "helpers/gc9a01.h"
 #include "helpers/helpers.h"
 #include "pico/stdlib.h"
-#include "helpers/gc9a01.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
@@ -22,7 +22,7 @@
 #define OFFSET 8
 #define NUM_CUBES 6
 
-//Fox Test
+// Fox Test
 extern const uint8_t fox_bytes[];
 
 // Bitmap dice data
@@ -40,7 +40,7 @@ static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_byt
 int main() {
     stdio_init_all();
     gc9a01_init();
-    
+
     // Draw green screen
     uint8_t green[2] = {0x07, 0xE0};
     gc9a01_set_windows(0, 0, 239, 239);
@@ -115,7 +115,7 @@ int main() {
     }
 
     sleep_ms(2000);
-    //Draw Fox Test
+    // Draw Fox Test
     draw_packed_bitmap(SPI_PORT, 0, 0, fox_bytes, 240, 0xFFFF);
 
     while (true) {
