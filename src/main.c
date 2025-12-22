@@ -17,7 +17,6 @@
 #define NUM_CUBES 6
 
 // Lock Buttons
-#define PIN_BUTTON 16
 #define PIN_BUTTON_1 7
 #define PIN_BUTTON_2 6
 #define PIN_BUTTON_3 28
@@ -81,14 +80,6 @@ void init_button(uint pin) {
     gpio_init(pin);
     gpio_set_dir(pin, GPIO_IN);
     gpio_pull_down(pin);
-}
-
-bool button_pressed(uint pin) {
-    if (gpio_get(pin)) {
-        sleep_ms(20);          // wait
-        return gpio_get(pin);  // check again
-    }
-    return false;
 }
 
 PressType check_long_press(uint pin, int index) {
