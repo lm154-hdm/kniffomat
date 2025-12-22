@@ -3,9 +3,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "hardware/i2c.h"
 #include "hardware/spi.h"
+#include "helpers/accelerometer_init.h"
 #include "helpers/gc9a01.h"
 #include "helpers/helpers.h"
+#include "helpers/shake_detection.h"
 #include "pico/stdlib.h"
 
 // Constants
@@ -14,7 +17,6 @@
 #define NUM_CUBES 6
 
 // Lock Buttons
-#define PIN_BUTTON 16
 #define PIN_BUTTON_1 7
 #define PIN_BUTTON_2 6
 #define PIN_BUTTON_3 28
@@ -68,18 +70,16 @@ uint8_t rolled[NUM_CUBES];
 static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
                                              dice4_bytes, dice5_bytes, dice6_bytes};
 
+// Accelerometer Connecting
+#define ACCELEROMETER_BUS_PORT i2c0
+static int accelerometer_address = 0x68;
+static int accelerometer_sda = 0;
+static int accelerometer_scl = 1;
+
 void init_button(uint pin) {
     gpio_init(pin);
     gpio_set_dir(pin, GPIO_IN);
     gpio_pull_down(pin);
-}
-
-bool button_pressed(uint pin) {
-    if (gpio_get(pin)) {
-        sleep_ms(20);          // wait
-        return gpio_get(pin);  // check again
-    }
-    return false;
 }
 
 PressType check_long_press(uint pin, int index) {
@@ -219,6 +219,19 @@ int main() {
     gc9a01_init();
     gc9a01_clear();
 
+    // Initialize Accelerometer
+    accelerometer_init(accelerometer_address, accelerometer_sda, accelerometer_scl);
+
+    // Draw green screen
+    uint8_t green[2] = {0x07, 0xE0};
+    gc9a01_set_windows(0, 0, 239, 239);
+    gpio_put(DC_PIN, 1);
+    for (int i = 0; i < 240 * 240; i++) {
+        spi_write_blocking(SPI_PORT, green, 2);
+    }
+    sleep_ms(2000);
+    gc9a01_clear();
+
     // Buttons
     init_button(PIN_BUTTON);
     init_button(PIN_BUTTON_1);
@@ -249,7 +262,7 @@ int main() {
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
     while (1) {
-        if (button_pressed(PIN_BUTTON)) {
+        if (was_shaken(accelerometer_address, accelerometer_sda, accelerometer_scl)) {
             gpio_put(PICO_DEFAULT_LED_PIN, 1);
             roll_dice();
             first_roll = true;
