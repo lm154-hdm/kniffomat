@@ -9,6 +9,7 @@
 #include "pico/stdlib.h"
 #include "helpers/gc9a01.h"
 #include "helpers/accelerometer_init.h"
+#include "helpers/shake_detection.h"
 
 // Constants
 #define M_PI 3.14159265358979323846

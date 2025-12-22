@@ -42,6 +42,7 @@ add_executable(Kniffel
     src/helpers/helpers.c
     src/helpers/gc9a01.c
     src/helpers/accelerometer_init.c
+    src/helpers/shake_detection.c
 ) 
 
 pico_set_program_name(Kniffel "Kniffel")

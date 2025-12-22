@@ -1,5 +1,6 @@
 #ifndef ACCELEROMETER_INIT_H
 #define ACCELEROMETER_INIT_H
+
 #include <stdint.h>
 
 #include "hardware/spi.h"
