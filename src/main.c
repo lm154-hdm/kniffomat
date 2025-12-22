@@ -38,6 +38,7 @@ static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_byt
                                              dice4_bytes, dice5_bytes, dice6_bytes};
 
 int main() {
+    // test pipeline
     stdio_init_all();
     gc9a01_init();
 
