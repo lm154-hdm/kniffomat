@@ -271,7 +271,7 @@ int main() {
     gpio_set_dir(PICO_DEFAULT_LED_PIN, GPIO_OUT);
 
     while (1) {
-        if (button_pressed(PIN_BUTTON)) {
+        if (was_shaken(accelerometer_address, accelerometer_sda, accelerometer_scl)) {
             gpio_put(PICO_DEFAULT_LED_PIN, 1);
             roll_dice();
             first_roll = true;
