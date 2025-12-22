@@ -35,7 +35,6 @@ fix_formatting:
     # name of current branch
     CI_COMMIT_BRANCH_NAME: $CI_COMMIT_REF_NAME
   before_script:
-    - apt-get update && apt-get install -y git
     - git config --global user.email "format-bot@pipeline.local"
     - git config --global user.name "Format Bot"
   script:
