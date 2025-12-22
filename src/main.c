@@ -37,8 +37,6 @@ extern const uint8_t dice_clear_bytes[480];
 static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
                                              dice4_bytes, dice5_bytes, dice6_bytes};
 
-bool empty_function() { return true; }
-
 int main() {
     stdio_init_all();
     gc9a01_init();
