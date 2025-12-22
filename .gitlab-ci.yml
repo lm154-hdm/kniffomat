@@ -26,6 +26,42 @@ check_formatting:
 
     - find src -name "*.c" -o -name "*.h" | xargs clang-format --dry-run --Werror
 
+fix_formatting:
+  stage: quality
+  allow_failure: false
+  needs: ["check_formatting"]
+  when: "on_failure"
+  variables:
+    # name of current branch
+    CI_COMMIT_BRANCH_NAME: $CI_COMMIT_REF_NAME
+  before_script:
+    - apt-get update && apt-get install -y git
+    - git config --global user.email "format-bot@pipeline.local"
+    - git config --global user.name "Format Bot"
+  script:
+    - echo "fixing formatting..."
+    
+    # 1. build url
+    - REPO_URL="https://oauth2:${GIT_PUSH_TOKEN}@gitlab.mi.hdm-stuttgart.de/${CI_PROJECT_PATH}.git"
+    
+    # 2. Branch auschecken
+    - git checkout $CI_COMMIT_BRANCH_NAME
+    
+    # 3. Formatierung anwenden (ohne --dry-run, mit -i für in-place edit)
+    - find src -name "*.c" -o -name "*.h" | xargs clang-format -i
+    
+    # 4. Prüfen ob sich wirklich was geändert hat
+    - |
+      if [[ -n $(git status --porcelain) ]]; then
+        git add src/
+        # [skip ci] to avoid infinite looping
+        git commit -m "Auto-fix: Apply clang-format style [skip ci]"
+        git push $REPO_URL $CI_COMMIT_BRANCH_NAME
+        echo "pushed fix"
+      else
+        echo "fix unsuccessful"
+      fi
+
 # --- Job 2: Statische Analyse (Strikt, bricht Pipeline ab) ---
 static_analysis:
   stage: quality
