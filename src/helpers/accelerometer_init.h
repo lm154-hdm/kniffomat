@@ -5,6 +5,6 @@
 
 #include "hardware/spi.h"
 
-void accelerometer_init(int accelerometer_adress, int accelerometer_sda, int accelerometer_scl);
+void accelerometer_init(int accelerometer_address, int accelerometer_sda, int accelerometer_scl);
 
 #endif

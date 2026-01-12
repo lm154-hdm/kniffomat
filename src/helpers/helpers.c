@@ -5,12 +5,15 @@
 #include "gc9a01.h"
 #include "pico/stdlib.h"
 
-#define PIN_MISO 12
-#define PIN_CS 13
-#define PIN_SCK 10
-#define PIN_MOSI 11
-#define PIN_DC 14
-#define PIN_RST 15
+// SPI Interface Pins
+#define PIN_MISO 12  // RX - Master In Slave Out
+#define PIN_CS 13    // Chip Select
+#define PIN_SCK 10   // Serial Clock
+#define PIN_MOSI 11  // TX - Master Out Slave In
+
+// Display Control Pins
+#define PIN_DC 14   // Data/Command - Low = Command/High = Data
+#define PIN_RST 15  // Reset
 
 // void clear_bitmap(uint8_t *bm, int cube_size) {
 //     for (int y = 0; y < cube_size; y++) {
@@ -25,25 +28,34 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
+    // Split 16 bit color into two 8-bit channels
     uint8_t col_hi = (color >> 8) & 0xFF;
     uint8_t col_lo = color & 0xFF;
+
+    // Display setup
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
+    gpio_put(PIN_CS, 0);                                 // select display
+    gpio_put(PIN_DC, 0);                                 // command mode
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
-    gpio_put(PIN_DC, 1);
+    gpio_put(PIN_DC, 1);                                 // data mode
+
+    // Allocate memory for one row (2 * w for 16-bit color)
     uint8_t *rowbuf = malloc(2 * w);
     if (!rowbuf) return;
+
+    // Iterate over single data-byte and convert each bit to two bytes of color data
     for (int ry = 0; ry < h; ry++) {
         const uint8_t *row_src = data + ry * bytes_per_row;
-        int bx = 0;
+        int bx = 0;  // current x-pixel position
         for (int byte_i = 0; byte_i < bytes_per_row; byte_i++) {
             uint8_t b = row_src[byte_i];
             for (int bit = 7; bit >= 0; bit--) {
                 if (bx >= w) break;
+                // Draw foreground if pixel is on
                 if (b & (1 << bit)) {
                     rowbuf[bx * 2] = col_hi;
                     rowbuf[bx * 2 + 1] = col_lo;
+                    // Draw black if pixel is off
                 } else {
                     rowbuf[bx * 2] = 0x00;
                     rowbuf[bx * 2 + 1] = 0x00;
@@ -51,9 +63,11 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
                 bx++;
             }
         }
+        // Send row to display
         spi_write_blocking(spi_port, rowbuf, w * 2);
     }
     free(rowbuf);
+    // Deselect display
     gpio_put(PIN_CS, 1);
 }
 
@@ -64,13 +78,19 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
     int bytes_per_row = (w + 7) / 8;
     // uint8_t col_hi = (color >> 8) & 0xFF;
     // uint8_t col_lo = color & 0xFF;
+
+    // Display setup
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
+    gpio_put(PIN_CS, 0);                                 // select display
+    gpio_put(PIN_DC, 0);                                 // command mode
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
-    gpio_put(PIN_DC, 1);
+    gpio_put(PIN_DC, 1);                                 // data mode
+
+    // Allocate memory for one row (2 * w for 16-bit color)
     uint8_t *rowbuf = malloc(2 * w);
     if (!rowbuf) return;
+
+    // Iterate over single data-byte and convert each bit to two bytes of color data
     for (int ry = 0; ry < h; ry++) {
         const uint8_t *row_src = data + ry * bytes_per_row;
         int bx = 0;
@@ -83,37 +103,41 @@ void draw_artifacted_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, cons
                 bx++;
             }
         }
+        // Send row to display
         spi_write_blocking(spi_port, rowbuf, w * 2);
     }
     free(rowbuf);
+    // Deselect display
     gpio_put(PIN_CS, 1);
 }
 
 void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
                                  const uint8_t *data, int cube_size,
-                                 uint16_t fg_color,  // Farbe für Pixel 1
-                                 uint16_t bg_color   // Farbe für Pixel 0
+                                 uint16_t fg_color,  // foreground color
+                                 uint16_t bg_color   // background color
 ) {
     int w = cube_size;
     int h = cube_size;
     int bytes_per_row = (w + 7) / 8;
 
-    uint8_t fg_hi = fg_color & 0xFF;         // LOW
-    uint8_t fg_lo = (fg_color >> 8) & 0xFF;  // HIGH
+    uint8_t fg_hi = fg_color & 0xFF;         // high
+    uint8_t fg_lo = (fg_color >> 8) & 0xFF;  // low
 
     uint8_t bg_hi = bg_color & 0xFF;
     uint8_t bg_lo = (bg_color >> 8) & 0xFF;
 
+    // Display setup
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
+    gpio_put(PIN_CS, 0);                                 // select display
+    gpio_put(PIN_DC, 0);                                 // command mode
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
+    gpio_put(PIN_DC, 1);                                 // data mode
 
-    gpio_put(PIN_CS, 0);
-    gpio_put(PIN_DC, 0);
-    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR command
-    gpio_put(PIN_DC, 1);
-
+    // Allocate memory for one row (2 * w for 16-bit color)
     uint8_t *rowbuf = malloc(2 * w);
     if (!rowbuf) return;
 
+    // Iterate over single data-byte and convert each bit to two bytes of color data
     for (int ry = 0; ry < h; ry++) {
         const uint8_t *row_src = data + ry * bytes_per_row;
         int bx = 0;
@@ -121,10 +145,11 @@ void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
             uint8_t b = row_src[byte_i];
             for (int bit = 7; bit >= 0; bit--) {
                 if (bx >= w) break;
-
+                // draw foreground if pixel is on
                 if (b & (1 << bit)) {
                     rowbuf[bx * 2] = fg_hi;
                     rowbuf[bx * 2 + 1] = fg_lo;
+                    // draw background if pixel is off
                 } else {
                     rowbuf[bx * 2] = bg_hi;
                     rowbuf[bx * 2 + 1] = bg_lo;
@@ -132,9 +157,11 @@ void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
                 bx++;
             }
         }
+        // Send row to display
         spi_write_blocking(spi_port, rowbuf, w * 2);
     }
 
     free(rowbuf);
+    // Deselect display
     gpio_put(PIN_CS, 1);
 }

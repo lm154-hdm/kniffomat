@@ -17,6 +17,7 @@
 #define NUM_CUBES 6
 
 // Lock Buttons
+#define PIN_BUTTON 0  // TODO check - might need to be removed and later parts fixed
 #define PIN_BUTTON_1 7
 #define PIN_BUTTON_2 6
 #define PIN_BUTTON_3 28
@@ -54,12 +55,6 @@ extern const uint8_t dice_clear_bytes[480];
 
 // Locking
 bool first_roll = false;
-bool lock_dice_1 = false;
-bool lock_dice_2 = false;
-bool lock_dice_3 = false;
-bool lock_dice_4 = false;
-bool lock_dice_5 = false;
-bool lock_dice_6 = false;
 bool lock_dice[NUM_CUBES] = {false, false, false, false, false, false};
 #define LONG_PRESS_TIME 600  // ms
 uint64_t press_start_time[NUM_CUBES] = {0};
@@ -70,7 +65,7 @@ uint8_t rolled[NUM_CUBES];
 static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
                                              dice4_bytes, dice5_bytes, dice6_bytes};
 
-// Accelerometer Connecting
+// Accelerometer Connections
 #define ACCELEROMETER_BUS_PORT i2c0
 static int accelerometer_address = 0x68;
 static int accelerometer_sda = 0;
@@ -83,17 +78,17 @@ void init_button(uint pin) {
 }
 
 PressType check_long_press(uint pin, int index) {
-    bool pressed_now = gpio_get(pin);
+    bool pressed = gpio_get(pin);
 
-    if (pressed_now && !last_press_state[index]) {
-        // pressed just now
+    if (pressed && !last_press_state[index]) {
+        // Pressed
         press_start_time[index] = time_us_64() / 1000;
     }
 
-    if (!pressed_now && last_press_state[index]) {
-        // released just now
+    if (!pressed && last_press_state[index]) {
+        // Released
         uint64_t duration = (time_us_64() / 1000) - press_start_time[index];
-        last_press_state[index] = pressed_now;
+        last_press_state[index] = pressed;
 
         if (duration >= LONG_PRESS_TIME)
             return LONG_PRESS;
@@ -101,56 +96,67 @@ PressType check_long_press(uint pin, int index) {
             return SHORT_PRESS;
     }
 
-    last_press_state[index] = pressed_now;
+    last_press_state[index] = pressed;
     return NO_PRESS;
 }
 
 void handle_locking() {
-    // only lock if it was already rolled
+    // Only lock if it was already rolled
     if (!first_roll) return;
 
     for (int i = 0; i < NUM_CUBES; i++) {
+        // Check button state
         PressType result = check_long_press(dice_buttons[i], i);
 
         if (result == SHORT_PRESS) {
-            lock_dice[i] = !lock_dice[i];
+            lock_dice[i] = !lock_dice[i];  // toggle state
 
             uint16_t draw_x = cube_positions[i].x;
             uint16_t draw_y = cube_positions[i].y;
 
             if (!lock_dice[i]) {
+                // Unlocked - Draw standard white number on black
                 draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE,
                                    0xFFFF);
             } else {
+                // Locked - Draw white number on RED background to highlight selection
                 draw_bitmap_with_background(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1],
                                             CUBE_SIZE, 0xFFFF, 0xF800);
             }
             printf("Dice %d %s\n", i + 1, lock_dice[i] ? "locked" : "unlocked");
+
+            // Block execution until button is released to prevent rapid toggling
             while (gpio_get(dice_buttons[i])) sleep_ms(10);
         }
 
         if (result == LONG_PRESS) {
+            // Iterate through all dice to unlock and redraw them
             for (int j = 0; j < NUM_CUBES; j++) {
                 lock_dice[j] = false;
                 uint16_t draw_x = cube_positions[j].x;
                 uint16_t draw_y = cube_positions[j].y;
+
+                // Redraw black background
                 draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], CUBE_SIZE,
                                    0xFFFF);
             }
             printf("All dice unlocked\n");
+
+            // Wait for release of the button that triggered the reset
             while (gpio_get(dice_buttons[i])) sleep_ms(10);
         }
     }
 }
 
 void roll_dice() {
-    // Reset screen
+    // Clear unlocked dice
     for (int i = 0; i < NUM_CUBES; i++) {
-        // Don't reset the locked buttons
         if (!lock_dice[i]) {
+            // Don't reset the locked buttons
             uint16_t draw_x = cube_positions[i].x;
             uint16_t draw_y = cube_positions[i].y;
 
+            // Draw wipe effect
             draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
         }
     }
@@ -159,12 +165,14 @@ void roll_dice() {
     // Animation
     uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_CUBES];
+    // Flash random dice as animation
     for (int t = 0; t < 2; t++) {
-        // Generate random dice for animation
+        // Calculate random numbers
         for (int i = 0; i < NUM_CUBES; i++) {
             seed = seed * 1664525 + 17;
             anim[i] = (seed % 6) + 1;  // 1-6
         }
+
         // Draw the random dice
         for (int i = 0; i < NUM_CUBES; i++) {
             if (!lock_dice[i]) {
@@ -175,7 +183,8 @@ void roll_dice() {
                                        0xFFFF);
             }
         }
-        sleep_ms(1000);
+        sleep_ms(1000);  // hold glitch frame
+
         for (int i = 0; i < NUM_CUBES; i++) {
             if (!lock_dice[i]) {
                 uint16_t draw_x = cube_positions[i].x;
@@ -184,25 +193,27 @@ void roll_dice() {
                                        0xFFFF);
             }
         }
-        sleep_ms(500);
+        sleep_ms(500);  // pause between blinks
     }
 
-    // Roll 6 dice using seeded randomness
-    // true randomness is not possible but can be noise detected from unused pins
+    // Roll 6 dice using random seed
+    // Noise from unused pins might be used as rand generator
     // adc_read()
     for (int i = 0; i < NUM_CUBES; i++) {
         if (!lock_dice[i]) {
-            seed = seed * 1664525 + 1013904223;
-            rolled[i] = (seed % 6) + 1;  // 1-6
+            seed = seed * 1664525 + 1013904223;  // Linear Congruential Generator
+            rolled[i] = (seed % 6) + 1;          // Result 1-6
         }
     }
+
+    // Debug output
     printf("Rolled dice: ");
     for (int i = 0; i < NUM_CUBES; i++) {
         printf("%d ", rolled[i]);
     }
     printf("\n");
 
-    // Draw the rolled dice in a concentric radial pattern
+    // Draw rolled dice in concentric radial pattern
     for (int i = 0; i < NUM_CUBES; i++) {
         if (!lock_dice[i]) {
             uint16_t draw_x = cube_positions[i].x;
@@ -242,7 +253,6 @@ int main() {
     init_button(PIN_BUTTON_6);
 
     // Evaluate Dice Positions
-    // Cubes
     uint16_t cx = SCREEN_W / 2;
     uint16_t cy = SCREEN_H / 2;
 
@@ -276,9 +286,5 @@ int main() {
         gpio_put(PICO_DEFAULT_LED_PIN, 0);
 
         sleep_ms(10);
-    }
-
-    while (true) {
-        tight_loop_contents();
     }
 }
