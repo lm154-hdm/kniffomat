@@ -44,7 +44,8 @@ fix_formatting:
     - REPO_URL="https://oauth2:${GIT_PUSH_TOKEN}@gitlab.mi.hdm-stuttgart.de/${CI_PROJECT_PATH}.git"
     
     # 2. Branch auschecken
-    - git checkout $CI_COMMIT_BRANCH_NAME
+    - git fetch origin $CI_COMMIT_BRANCH_NAME
+    - git checkout -B $CI_COMMIT_BRANCH_NAME origin/$CI_COMMIT_BRANCH_NAME
     
     # 3. Formatierung anwenden (ohne --dry-run, mit -i für in-place edit)
     - find src -name "*.c" -o -name "*.h" | xargs clang-format -i
