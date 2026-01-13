@@ -51,13 +51,13 @@ sudo dnf install cmake arm-none-eabi-gcc-cs arm-none-eabi-newlib make
 brew install cmake arm-none-eabi-gcc
 ```
 
-2. Clone the Repository
+### **2. Clone the Repository
 ```
 git clone [https://gitlab.com/your-username/your-project.git](https://gitlab.com/your-username/your-project.git)
 cd your-project
 ```
 
-3. Build the Firmware
+### ** 3. Build the Firmware
 We use PICO_SDK_FETCH_FROM_GIT=ON, so the build system will automatically download the Pico SDK for you during the first configuration.
 ```
 mkdir -p build
