@@ -14,7 +14,7 @@
 // Constants
 #define M_PI 3.14159265358979323846
 
-#define NUM_CUBES 6
+#define NUM_DICE 6
 
 // Lock Buttons
 #define PIN_BUTTON_1 7
@@ -23,8 +23,8 @@
 #define PIN_BUTTON_4 27
 #define PIN_BUTTON_5 26
 #define PIN_BUTTON_6 22
-uint dice_buttons[NUM_CUBES] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
-                                PIN_BUTTON_4, PIN_BUTTON_5, PIN_BUTTON_6};
+uint dice_buttons[NUM_DICE] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
+                               PIN_BUTTON_4, PIN_BUTTON_5, PIN_BUTTON_6};
 
 // Screensize
 #define SCREEN_W 240
@@ -32,7 +32,7 @@ uint dice_buttons[NUM_CUBES] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
 #define RADIUS 80
 
 // Dice size
-#define CUBE_SIZE 60
+#define DICE_SIZE 60
 #define POINT_SIZE 8
 #define OFFSET 8
 
@@ -40,8 +40,8 @@ uint dice_buttons[NUM_CUBES] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
 typedef struct {
     uint16_t x;
     uint16_t y;
-} CubePosition;
-CubePosition cube_positions[NUM_CUBES];
+} DicePosition;
+DicePosition dice_positions[NUM_DICE];
 
 // Bitmap dice data
 extern const uint8_t dice1_bytes[480];
@@ -54,15 +54,15 @@ extern const uint8_t dice_clear_bytes[480];
 
 // Locking
 bool first_roll = false;
-bool lock_dice[NUM_CUBES] = {false, false, false, false, false, false};
+bool lock_dice[NUM_DICE] = {false, false, false, false, false, false};
 #define LONG_PRESS_TIME 600  // ms
-uint64_t press_start_time[NUM_CUBES] = {0};
-bool last_press_state[NUM_CUBES] = {0};
+uint64_t press_start_time[NUM_DICE] = {0};
+bool last_press_state[NUM_DICE] = {0};
 typedef enum { NO_PRESS, SHORT_PRESS, LONG_PRESS } PressType;
-uint8_t rolled[NUM_CUBES];
+uint8_t rolled[NUM_DICE];
 
-static const uint8_t *dice_arr[NUM_CUBES] = {dice1_bytes, dice2_bytes, dice3_bytes,
-                                             dice4_bytes, dice5_bytes, dice6_bytes};
+static const uint8_t *dice_arr[NUM_DICE] = {dice1_bytes, dice2_bytes, dice3_bytes,
+                                            dice4_bytes, dice5_bytes, dice6_bytes};
 
 // Accelerometer Connections
 #define ACCELEROMETER_BUS_PORT i2c0
@@ -103,24 +103,24 @@ void handle_locking() {
     // Only lock if it was already rolled
     if (!first_roll) return;
 
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_DICE; i++) {
         // Check button state
         PressType result = check_long_press(dice_buttons[i], i);
 
         if (result == SHORT_PRESS) {
             lock_dice[i] = !lock_dice[i];  // toggle state
 
-            uint16_t draw_x = cube_positions[i].x;
-            uint16_t draw_y = cube_positions[i].y;
+            uint16_t draw_x = dice_positions[i].x;
+            uint16_t draw_y = dice_positions[i].y;
 
             if (!lock_dice[i]) {
                 // Unlocked - Draw standard white number on black
-                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE,
+                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], DICE_SIZE,
                                    0xFFFF);
             } else {
                 // Locked - Draw white number on RED background to highlight selection
                 draw_bitmap_with_background(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1],
-                                            CUBE_SIZE, 0xFFFF, 0xF800);
+                                            DICE_SIZE, 0xFFFF, 0xF800);
             }
             printf("Dice %d %s\n", i + 1, lock_dice[i] ? "locked" : "unlocked");
 
@@ -130,13 +130,13 @@ void handle_locking() {
 
         if (result == LONG_PRESS) {
             // Iterate through all dice to unlock and redraw them
-            for (int j = 0; j < NUM_CUBES; j++) {
+            for (int j = 0; j < NUM_DICE; j++) {
                 lock_dice[j] = false;
-                uint16_t draw_x = cube_positions[j].x;
-                uint16_t draw_y = cube_positions[j].y;
+                uint16_t draw_x = dice_positions[j].x;
+                uint16_t draw_y = dice_positions[j].y;
 
                 // Redraw black background
-                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], CUBE_SIZE,
+                draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], DICE_SIZE,
                                    0xFFFF);
             }
             printf("All dice unlocked\n");
@@ -149,46 +149,46 @@ void handle_locking() {
 
 void roll_dice() {
     // Clear unlocked dice
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_DICE; i++) {
         if (!lock_dice[i]) {
             // Don't reset the locked buttons
-            uint16_t draw_x = cube_positions[i].x;
-            uint16_t draw_y = cube_positions[i].y;
+            uint16_t draw_x = dice_positions[i].x;
+            uint16_t draw_y = dice_positions[i].y;
 
             // Draw wipe effect
-            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE, 0xFFFF);
+            draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, DICE_SIZE, 0xFFFF);
         }
     }
     sleep_ms(300);
 
     // Animation
-    uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
-    uint8_t anim[NUM_CUBES];
+    uint8_t anim[NUM_DICE];
     // Flash random dice as animation
     for (int t = 0; t < 2; t++) {
         // Calculate random numbers
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_DICE; i++) {
+            uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
             seed = seed * 1664525 + 17;
             anim[i] = (seed % 6) + 1;  // 1-6
         }
 
         // Draw the random dice
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_DICE; i++) {
             if (!lock_dice[i]) {
-                uint16_t draw_x = cube_positions[i].x;
-                uint16_t draw_y = cube_positions[i].y;
+                uint16_t draw_x = dice_positions[i].x;
+                uint16_t draw_y = dice_positions[i].y;
 
-                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], CUBE_SIZE,
+                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[anim[i] - 1], DICE_SIZE,
                                        0xFFFF);
             }
         }
         sleep_ms(1000);  // hold glitch frame
 
-        for (int i = 0; i < NUM_CUBES; i++) {
+        for (int i = 0; i < NUM_DICE; i++) {
             if (!lock_dice[i]) {
-                uint16_t draw_x = cube_positions[i].x;
-                uint16_t draw_y = cube_positions[i].y;
-                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, CUBE_SIZE,
+                uint16_t draw_x = dice_positions[i].x;
+                uint16_t draw_y = dice_positions[i].y;
+                draw_artifacted_bitmap(SPI_PORT, draw_x, draw_y, dice_clear_bytes, DICE_SIZE,
                                        0xFFFF);
             }
         }
@@ -198,7 +198,7 @@ void roll_dice() {
     // Roll 6 dice using random seed
     // Noise from unused pins might be used as rand generator
     // adc_read()
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_DICE; i++) {
         if (!lock_dice[i]) {
             seed = seed * 1664525 + 1013904223;  // Linear Congruential Generator
             rolled[i] = (seed % 6) + 1;          // Result 1-6
@@ -207,18 +207,18 @@ void roll_dice() {
 
     // Debug output
     printf("Rolled dice: ");
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_DICE; i++) {
         printf("%d ", rolled[i]);
     }
     printf("\n");
 
     // Draw rolled dice in concentric radial pattern
-    for (int i = 0; i < NUM_CUBES; i++) {
+    for (int i = 0; i < NUM_DICE; i++) {
         if (!lock_dice[i]) {
-            uint16_t draw_x = cube_positions[i].x;
-            uint16_t draw_y = cube_positions[i].y;
+            uint16_t draw_x = dice_positions[i].x;
+            uint16_t draw_y = dice_positions[i].y;
 
-            draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], CUBE_SIZE,
+            draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1], DICE_SIZE,
                                0xFFFF);
         }
     }
@@ -254,16 +254,16 @@ int main() {
     uint16_t cx = SCREEN_W / 2;
     uint16_t cy = SCREEN_H / 2;
 
-    for (int i = 0; i < NUM_CUBES; i++) {
-        float theta = 2.0f * M_PI * (float)i / (float)NUM_CUBES;
+    for (int i = 0; i < NUM_DICE; i++) {
+        float theta = 2.0f * M_PI * (float)i / (float)NUM_DICE;
         float x = cx + RADIUS * cosf(theta);
         float y = cy + RADIUS * sinf(theta);
 
-        uint16_t draw_x = (uint16_t)(x - CUBE_SIZE / 2);
-        uint16_t draw_y = (uint16_t)(y - CUBE_SIZE / 2);
+        uint16_t draw_x = (uint16_t)(x - DICE_SIZE / 2);
+        uint16_t draw_y = (uint16_t)(y - DICE_SIZE / 2);
 
-        cube_positions[i].x = draw_x;
-        cube_positions[i].y = draw_y;
+        dice_positions[i].x = draw_x;
+        dice_positions[i].y = draw_y;
     }
 
     gpio_init(PICO_DEFAULT_LED_PIN);
