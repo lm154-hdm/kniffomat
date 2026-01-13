@@ -17,7 +17,6 @@
 #define NUM_CUBES 6
 
 // Lock Buttons
-#define PIN_BUTTON 0  // TODO check - might need to be removed and later parts fixed
 #define PIN_BUTTON_1 7
 #define PIN_BUTTON_2 6
 #define PIN_BUTTON_3 28
@@ -244,7 +243,6 @@ int main() {
     gc9a01_clear();
 
     // Buttons
-    init_button(PIN_BUTTON);
     init_button(PIN_BUTTON_1);
     init_button(PIN_BUTTON_2);
     init_button(PIN_BUTTON_3);
@@ -276,10 +274,6 @@ int main() {
             gpio_put(PICO_DEFAULT_LED_PIN, 1);
             roll_dice();
             first_roll = true;
-
-            while (gpio_get(PIN_BUTTON)) {
-                sleep_ms(10);
-            }
         }
 
         handle_locking();
