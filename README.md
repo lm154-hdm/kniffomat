@@ -1,29 +1,74 @@
 # **Quickstart: Flashing a Raspberry Pi Pico 2**
 
-## **1. Install Dependencies**
+# Getting the Firmware
 
-```bash
-sudo apt install libusb-1.0-0-dev
+You can get the firmware for your Pico in one of two ways:
+1. **[GitLab Pipeline](#option-1-download-from-gitlab-recommended)**: Let GitLab build it for you and download the result.
+2. **[Build Natively](#option-2-build-natively)**: Build it on your own machine (best for development).
+
+---
+
+## **Option 1: Download from GitLab (Recommended)**
+
+You do not need to install any software to get the latest firmware. You can simply fork this repository and let the GitLab CI/CD pipeline build it for you.
+
+1. **Fork the Project**
+   * Click the **Fork** button in the top right of the GitLab repository page.
+   * Select your personal namespace.
+
+2. **Run the Pipeline**
+   * Go to **Build > Pipelines** in the left sidebar of your forked repository.
+   * If a pipeline isn't running already, click **Run pipeline** in the top right.
+   * Select the `main` branch and click **Run pipeline**.
+
+3. **Download the Artifacts**
+   * Once the pipeline finishes (Green Checkmark ✅), click the **Download** icon on the right side of the pipeline row.
+   * Select **Build Artifacts** (or the specific job name, e.g., `build_firmware`).
+   * Unzip the download and locate the `.uf2` file.
+
+---
+
+## **Option 2: Build Natively**
+
+If you want to modify the code or develop locally, follow these steps.
+
+### **1. Install Build Dependencies**
+You need CMake, the ARM GCC compiler, and standard build tools.
+
+**Ubuntu / Debian / Raspberry Pi OS:**
+```
+sudo apt update
+sudo apt install cmake gcc-arm-none-eabi libnewlib-arm-none-eabi build-essential
 ```
 
-## **2. Install the Pico SDK**
-
-```bash
-git clone https://github.com/raspberrypi/pico-sdk.git
-cd pico-sdk
-git submodule update --init --recursive
+**Fedora:**
+```
+sudo dnf install cmake arm-none-eabi-gcc-cs arm-none-eabi-newlib make
 ```
 
-## **3. Build the Firmware**
+***macOS:***
+```
+brew install cmake arm-none-eabi-gcc
+```
 
-```bash
+### **2. Clone the Repository**
+```
+git clone [https://gitlab.com/your-username/your-project.git](https://gitlab.com/your-username/your-project.git)
+cd your-project
+```
+
+### **3. Build the Firmware**
+We use PICO_SDK_FETCH_FROM_GIT=ON, so the build system will automatically download the Pico SDK for you during the first configuration.
+```
 mkdir -p build
 cd build
-cmake ..
-make 
-```
 
-Your `.uf2` file will appear in the `build/` directory.
+# Configure the project (downloads SDK automatically)
+cmake -DPICO_SDK_FETCH_FROM_GIT=ON ..
+
+# Compile
+make
+```
 
 ## **5. Enter Bootloader Mode**
 
