@@ -22,7 +22,7 @@ You do not need to install any software to get the latest firmware. You can simp
    * Select the `main` branch and click **Run pipeline**.
 
 3. **Download the Artifacts**
-   * Once the pipeline finishes (Green Checkmark ✅), click the **Download** icon (⬇️) on the right side of the pipeline row.
+   * Once the pipeline finishes (Green Checkmark ✅), click the **Download** icon on the right side of the pipeline row.
    * Select **Build Artifacts** (or the specific job name, e.g., `build_firmware`).
    * Unzip the download and locate the `.uf2` file.
 
@@ -51,13 +51,13 @@ sudo dnf install cmake arm-none-eabi-gcc-cs arm-none-eabi-newlib make
 brew install cmake arm-none-eabi-gcc
 ```
 
-### **2. Clone the Repository
+### **2. Clone the Repository**
 ```
 git clone [https://gitlab.com/your-username/your-project.git](https://gitlab.com/your-username/your-project.git)
 cd your-project
 ```
 
-### ** 3. Build the Firmware
+### **3. Build the Firmware**
 We use PICO_SDK_FETCH_FROM_GIT=ON, so the build system will automatically download the Pico SDK for you during the first configuration.
 ```
 mkdir -p build
