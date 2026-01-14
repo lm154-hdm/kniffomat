@@ -17,12 +17,12 @@
 #define NUM_DICE 6
 
 // Lock Buttons
-#define PIN_BUTTON_1 7
-#define PIN_BUTTON_2 6
-#define PIN_BUTTON_3 28
-#define PIN_BUTTON_4 27
-#define PIN_BUTTON_5 26
-#define PIN_BUTTON_6 22
+#define PIN_BUTTON_1 16
+#define PIN_BUTTON_2 17
+#define PIN_BUTTON_3 18
+#define PIN_BUTTON_4 19
+#define PIN_BUTTON_5 20
+#define PIN_BUTTON_6 21
 uint dice_buttons[NUM_DICE] = {PIN_BUTTON_1, PIN_BUTTON_2, PIN_BUTTON_3,
                                PIN_BUTTON_4, PIN_BUTTON_5, PIN_BUTTON_6};
 
@@ -72,12 +72,13 @@ static int accelerometer_scl = 1;
 
 void init_button(uint pin) {
     gpio_init(pin);
+    gpio_set_function(pin, GPIO_FUNC_SIO);
     gpio_set_dir(pin, GPIO_IN);
-    gpio_pull_down(pin);
+    gpio_pull_up(pin);
 }
 
 PressType check_long_press(uint pin, int index) {
-    bool pressed = gpio_get(pin);
+    bool pressed = !gpio_get(pin);
 
     if (pressed && !last_press_state[index]) {
         // Pressed
@@ -122,10 +123,6 @@ void handle_locking() {
                 draw_bitmap_with_background(SPI_PORT, draw_x, draw_y, dice_arr[rolled[i] - 1],
                                             DICE_SIZE, 0xFFFF, 0xF800);
             }
-            printf("Dice %d %s\n", i + 1, lock_dice[i] ? "locked" : "unlocked");
-
-            // Block execution until button is released to prevent rapid toggling
-            while (gpio_get(dice_buttons[i])) sleep_ms(10);
         }
 
         if (result == LONG_PRESS) {
@@ -139,10 +136,6 @@ void handle_locking() {
                 draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], DICE_SIZE,
                                    0xFFFF);
             }
-            printf("All dice unlocked\n");
-
-            // Wait for release of the button that triggered the reset
-            while (gpio_get(dice_buttons[i])) sleep_ms(10);
         }
     }
 }
@@ -227,6 +220,15 @@ void roll_dice() {
 
 int main() {
     stdio_init_all();
+    
+    // Buttons
+    init_button(PIN_BUTTON_1);
+    init_button(PIN_BUTTON_2);
+    init_button(PIN_BUTTON_3);
+    init_button(PIN_BUTTON_4);
+    init_button(PIN_BUTTON_5);
+    init_button(PIN_BUTTON_6);
+
     gc9a01_init();
     gc9a01_clear();
 
@@ -243,13 +245,6 @@ int main() {
     sleep_ms(2000);
     gc9a01_clear();
 
-    // Buttons
-    init_button(PIN_BUTTON_1);
-    init_button(PIN_BUTTON_2);
-    init_button(PIN_BUTTON_3);
-    init_button(PIN_BUTTON_4);
-    init_button(PIN_BUTTON_5);
-    init_button(PIN_BUTTON_6);
 
     // Evaluate Dice Positions
     uint16_t cx = SCREEN_W / 2;
