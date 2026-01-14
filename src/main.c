@@ -162,6 +162,7 @@ void roll_dice() {
     sleep_ms(300);
 
     // Animation
+    uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_DICE];
     // Flash random dice as animation
     for (int t = 0; t < 2; t++) {
