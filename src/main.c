@@ -55,8 +55,8 @@ static const uint8_t *dice_arr[NUM_DICE] = {dice1_bytes, dice2_bytes, dice3_byte
                                             dice4_bytes, dice5_bytes, dice6_bytes};
 
 // Long/Short Press Detection
-#define DEBOUNCE_US     30000
-#define LONG_PRESS_US  600000
+#define DEBOUNCE_US 30000
+#define LONG_PRESS_US 600000
 typedef enum { NO_PRESS, SHORT_PRESS, LONG_PRESS } PressType;
 typedef struct {
     bool last_state;              // logical pressed (true = pressed)
@@ -106,9 +106,7 @@ PressType button_update(button_t *btn, uint pin) {
 
     // Hold
     if (pressed && btn->last_state) {
-        if (!btn->long_fired &&
-            absolute_time_diff_us(btn->press_start, now) >= LONG_PRESS_US) {
-
+        if (!btn->long_fired && absolute_time_diff_us(btn->press_start, now) >= LONG_PRESS_US) {
             btn->long_fired = true;
             return LONG_PRESS;
         }
@@ -128,14 +126,13 @@ PressType button_update(button_t *btn, uint pin) {
 }
 
 // Initialize Dice before first roll
-void handle_dice_initialization(){
-  for (int i = 0; i < NUM_DICE; i++) {
+void handle_dice_initialization() {
+    for (int i = 0; i < NUM_DICE; i++) {
         PressType ev = button_update(&dice_button_state[i], dice_buttons[i]);
         if (ev == SHORT_PRESS) {
             init_dice[i] = !init_dice[i];  // toggle state
         }
     }
-
 }
 
 // Set blinking state for all dice
@@ -160,40 +157,28 @@ void blink_dice_render(void) {
 
     // Make sure initialized dice are shown
     if (init_dice[blink_draw_index]) {
-        draw_packed_bitmap(
-            SPI_PORT, x, y,
-            dice_arr[blink_draw_index],
-            DICE_SIZE, 0xFFFF
-        );
-    // Show
-    else if (blink_state) {
-        draw_packed_bitmap(
-            SPI_PORT, x, y,
-            dice_arr[blink_draw_index],
-            DICE_SIZE, 0xFFFF
-        );
-    // Hide
+        draw_packed_bitmap(SPI_PORT, x, y, dice_arr[blink_draw_index], DICE_SIZE, 0xFFFF);
+        // Show
+    } else if (blink_state) {
+        draw_packed_bitmap(SPI_PORT, x, y, dice_arr[blink_draw_index], DICE_SIZE, 0xFFFF);
+        // Hide
     } else {
-        draw_artifacted_bitmap(
-            SPI_PORT, x, y,
-            dice_clear_bytes,
-            DICE_SIZE, 0xFFFF
-        );
+        draw_artifacted_bitmap(SPI_PORT, x, y, dice_clear_bytes, DICE_SIZE, 0xFFFF);
     }
 
     blink_draw_index++;
 
     if (blink_draw_index >= NUM_DICE) {
         blink_draw_index = 0;
-        blink_dirty = false;   // finished rendering
+        blink_dirty = false;  // finished rendering
     }
 }
 
 void handle_locking() {
     for (int i = 0; i < NUM_DICE; i++) {
         // Don'tl listen to uninitialized dice
-        if (!init_dice[i]){
-          continue;
+        if (!init_dice[i]) {
+            continue;
         }
 
         // Check button state
@@ -219,14 +204,14 @@ void handle_locking() {
         if (result == LONG_PRESS) {
             // Iterate through all initialized dice to unlock and redraw them
             for (int j = 0; j < NUM_DICE; j++) {
-                if (init_dice[j]){
+                if (init_dice[j]) {
                     lock_dice[j] = false;
                     uint16_t draw_x = dice_positions[j].x;
                     uint16_t draw_y = dice_positions[j].y;
 
                     // Redraw black background
                     draw_packed_bitmap(SPI_PORT, draw_x, draw_y, dice_arr[rolled[j] - 1], DICE_SIZE,
-                                    0xFFFF);
+                                       0xFFFF);
                 }
             }
         }
@@ -270,7 +255,7 @@ void roll_dice() {
             }
         }
         sleep_ms(400);  // hold glitch frame
-        
+
         // Clear the drawn dice -> ignore uninitialized and locked dice
         for (int i = 0; i < NUM_DICE; i++) {
             if (init_dice[i] && !lock_dice[i]) {
@@ -314,7 +299,7 @@ void roll_dice() {
 
 int main() {
     stdio_init_all();
-    
+
     // Buttons
     init_button(PIN_BUTTON_1);
     init_button(PIN_BUTTON_2);
@@ -338,7 +323,6 @@ int main() {
     }
     sleep_ms(2000);
     gc9a01_clear();
-
 
     // Evaluate Dice Positions
     uint16_t cx = SCREEN_W / 2;
@@ -367,7 +351,7 @@ int main() {
         // Roll Dice on shake
         if (was_shaken(accelerometer_address, accelerometer_sda, accelerometer_scl)) {
             gpio_put(PICO_DEFAULT_LED_PIN, 1);
-            roll_dice(); // This locks every input while rolling. This is wanted.
+            roll_dice();  // This locks every input while rolling. This is wanted.
             first_roll = true;
 
             // Reset button states after roll
@@ -378,16 +362,16 @@ int main() {
         }
 
         // Handle blinking and dice initialization before first roll
-        if (!first_roll){
+        if (!first_roll) {
             handle_dice_initialization();
             blink_dice_tick();
-            blink_dice_render(); 
+            blink_dice_render();
         }
         // Handle locking after first roll
         else {
             handle_locking();
         }
-        
+
         gpio_put(PICO_DEFAULT_LED_PIN, 0);
 
         sleep_ms(1);
