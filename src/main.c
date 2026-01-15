@@ -239,7 +239,6 @@ void roll_dice() {
     for (int t = 0; t < 2; t++) {
         // Calculate random numbers
         for (int i = 0; i < NUM_DICE; i++) {
-            uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
             seed = seed * 1664525 + 17;
             anim[i] = (seed % 6) + 1;  // 1-6
         }
