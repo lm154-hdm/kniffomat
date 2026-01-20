@@ -126,12 +126,32 @@ void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
     uint8_t bg_hi = bg_color & 0xFF;
     uint8_t bg_lo = (bg_color >> 8) & 0xFF;
 
-    // Display setup
+    // Draw 64x64px red square background
+    uint16_t red = 0xF800;  // 16-bit RGB565 red
+    gc9a01_set_windows(x0, y0, x0 + 63, y0 + 63);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
+    gpio_put(PIN_DC, 1);
+
+    uint8_t red_hi = (red >> 8) & 0xFF;
+    uint8_t red_lo = red & 0xFF;
+    uint8_t red_row[128];
+    for (int i = 0; i < 128; i += 2) {
+        red_row[i] = red_hi;
+        red_row[i + 1] = red_lo;
+    }
+    for (int i = 0; i < 64; i++) {
+        spi_write_blocking(spi_port, red_row, 128);
+    }
+    gpio_put(PIN_CS, 1);
+
+    // Reset window for dice rendering
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);                                 // select display
-    gpio_put(PIN_DC, 0);                                 // command mode
-    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
-    gpio_put(PIN_DC, 1);                                 // data mode
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
+    gpio_put(PIN_DC, 1);
 
     // Allocate memory for one row (2 * w for 16-bit color)
     uint8_t *rowbuf = malloc(2 * w);
