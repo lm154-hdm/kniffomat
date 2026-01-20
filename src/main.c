@@ -218,6 +218,22 @@ void handle_locking() {
     }
 }
 
+void check_dice_initialization(){
+    // If no Dice was initialized, initialize all Dice
+    bool all_uninitialized = true;
+    for (int i = 0; i < NUM_DICE; i++) {
+        if (init_dice[i]) {
+            all_uninitialized = false;
+            break;
+        }
+    }
+    if (all_uninitialized){
+        for (int i = 0; i < NUM_DICE; i++) {
+            init_dice[i] = true;
+        }
+    }
+}
+
 void roll_dice() {
     // Clear unlocked dice
     for (int i = 0; i < NUM_DICE; i++) {
@@ -236,7 +252,7 @@ void roll_dice() {
     uint32_t seed = (uint32_t)to_us_since_boot(get_absolute_time());
     uint8_t anim[NUM_DICE];
     // Flash random dice as animation
-    for (int t = 0; t < 2; t++) {
+    for (int t = 0; t < 3; t++) {
         // Calculate random numbers
         for (int i = 0; i < NUM_DICE; i++) {
             seed = seed * 1664525 + 17;
@@ -253,7 +269,7 @@ void roll_dice() {
                                        0xFFFF);
             }
         }
-        sleep_ms(400);  // hold glitch frame
+        sleep_ms(500);  // hold glitch frame
 
         // Clear the drawn dice -> ignore uninitialized and locked dice
         for (int i = 0; i < NUM_DICE; i++) {
@@ -264,7 +280,7 @@ void roll_dice() {
                                        0xFFFF);
             }
         }
-        sleep_ms(150);  // pause between blinks
+        sleep_ms(200);  // pause between blinks
     }
 
     // Roll 6 dice using random seed
@@ -350,6 +366,7 @@ int main() {
         // Roll Dice on shake
         if (was_shaken(accelerometer_address, accelerometer_sda, accelerometer_scl)) {
             gpio_put(PICO_DEFAULT_LED_PIN, 1);
+            if (!first_roll) check_dice_initialization();
             roll_dice();  // This locks every input while rolling. This is wanted.
             first_roll = true;
 
