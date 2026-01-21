@@ -10,6 +10,7 @@
 #include "helpers/helpers.h"
 #include "helpers/shake_detection.h"
 #include "pico/stdlib.h"
+#include "startscreen.h"
 
 // Constants
 #define M_PI 3.14159265358979323846
@@ -218,7 +219,7 @@ void handle_locking() {
     }
 }
 
-void check_dice_initialization(){
+void check_dice_initialization() {
     // If no Dice was initialized, initialize all Dice
     bool all_uninitialized = true;
     for (int i = 0; i < NUM_DICE; i++) {
@@ -227,7 +228,7 @@ void check_dice_initialization(){
             break;
         }
     }
-    if (all_uninitialized){
+    if (all_uninitialized) {
         for (int i = 0; i < NUM_DICE; i++) {
             init_dice[i] = true;
         }
@@ -329,14 +330,19 @@ int main() {
     // Initialize Accelerometer
     accelerometer_init(accelerometer_address, accelerometer_sda, accelerometer_scl);
 
-    // Draw green screen
-    uint8_t green[2] = {0x07, 0xE0};
+    // Draw start screen (test different colors. Remove two of them later)
     gc9a01_set_windows(0, 0, 239, 239);
     gpio_put(DC_PIN, 1);
-    for (int i = 0; i < 240 * 240; i++) {
-        spi_write_blocking(SPI_PORT, green, 2);
-    }
-    sleep_ms(2000);
+
+    spi_write_blocking(SPI_PORT, image1, START_IMAGE_SIZE);
+    sleep_ms(3000);
+
+    spi_write_blocking(SPI_PORT, image2, START_IMAGE_SIZE);
+    sleep_ms(3000);
+
+    spi_write_blocking(SPI_PORT, image3, START_IMAGE_SIZE);
+    sleep_ms(3000);
+
     gc9a01_clear();
 
     // Evaluate Dice Positions
