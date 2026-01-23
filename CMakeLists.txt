@@ -39,6 +39,7 @@ add_executable(Kniffel
     src/main.c 
     src/dice.c     
     src/fox.c
+    src/startscreen.c
     src/helpers/helpers.c
     src/helpers/gc9a01.c
     src/helpers/accelerometer_init.c

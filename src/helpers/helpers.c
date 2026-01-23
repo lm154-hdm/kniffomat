@@ -32,6 +32,26 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
     uint8_t col_hi = (color >> 8) & 0xFF;
     uint8_t col_lo = color & 0xFF;
 
+    // clear display black
+    uint16_t black = 0x0000;  // 16-bit RGB565 black
+    gc9a01_set_windows(x0 - 4, y0 - 4, x0 + 63, y0 + 63);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
+    gpio_put(PIN_DC, 1);
+
+    uint8_t red_hi = (black >> 8) & 0xFF;
+    uint8_t red_lo = black & 0xFF;
+    uint8_t red_row[128];
+    for (int i = 0; i < 128; i += 2) {
+        red_row[i] = red_hi;
+        red_row[i + 1] = red_lo;
+    }
+    for (int i = 0; i < 73; i++) {
+        spi_write_blocking(spi_port, red_row, 128);
+    }
+    gpio_put(PIN_CS, 1);
+
     // Display setup
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
     gpio_put(PIN_CS, 0);                                 // select display
@@ -126,12 +146,32 @@ void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
     uint8_t bg_hi = bg_color & 0xFF;
     uint8_t bg_lo = (bg_color >> 8) & 0xFF;
 
-    // Display setup
+    // Draw 64x64px red square background
+    uint16_t red = 0xF800;  // 16-bit RGB565 red
+    gc9a01_set_windows(x0 - 2, y0 - 2, x0 + 60, y0 + 61);
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
+    gpio_put(PIN_DC, 1);
+
+    uint8_t red_hi = (red >> 8) & 0xFF;
+    uint8_t red_lo = red & 0xFF;
+    uint8_t red_row[128];
+    for (int i = 0; i < 128; i += 2) {
+        red_row[i] = red_hi;
+        red_row[i + 1] = red_lo;
+    }
+    for (int i = 0; i < 72; i++) {
+        spi_write_blocking(spi_port, red_row, 128);
+    }
+    gpio_put(PIN_CS, 1);
+
+    // Reset window for dice rendering
     gc9a01_set_windows(x0, y0, x0 + w - 1, y0 + h - 1);
-    gpio_put(PIN_CS, 0);                                 // select display
-    gpio_put(PIN_DC, 0);                                 // command mode
-    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);  // RAMWR
-    gpio_put(PIN_DC, 1);                                 // data mode
+    gpio_put(PIN_CS, 0);
+    gpio_put(PIN_DC, 0);
+    spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
+    gpio_put(PIN_DC, 1);
 
     // Allocate memory for one row (2 * w for 16-bit color)
     uint8_t *rowbuf = malloc(2 * w);
