@@ -34,7 +34,7 @@ void draw_packed_bitmap(spi_inst_t *spi_port, uint16_t x0, uint16_t y0, const ui
 
     // clear display black
     uint16_t black = 0x0000;  // 16-bit RGB565 black
-    gc9a01_set_windows(x0-4, y0-4, x0 + 63, y0 + 63);
+    gc9a01_set_windows(x0 - 4, y0 - 4, x0 + 63, y0 + 63);
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
@@ -148,7 +148,7 @@ void draw_bitmap_with_background(spi_inst_t *spi_port, uint16_t x0, uint16_t y0,
 
     // Draw 64x64px red square background
     uint16_t red = 0xF800;  // 16-bit RGB565 red
-    gc9a01_set_windows(x0-2, y0-2, x0 + 60, y0 + 61);
+    gc9a01_set_windows(x0 - 2, y0 - 2, x0 + 60, y0 + 61);
     gpio_put(PIN_CS, 0);
     gpio_put(PIN_DC, 0);
     spi_write_blocking(spi_port, (uint8_t[]){0x2C}, 1);
