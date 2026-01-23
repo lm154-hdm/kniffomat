@@ -330,17 +330,11 @@ int main() {
     // Initialize Accelerometer
     accelerometer_init(accelerometer_address, accelerometer_sda, accelerometer_scl);
 
-    // Draw start screen (test different colors. Remove two of them later)
+    // Draw start screen
     gc9a01_set_windows(0, 0, 239, 239);
     gpio_put(DC_PIN, 1);
 
-    spi_write_blocking(SPI_PORT, image1, START_IMAGE_SIZE);
-    sleep_ms(3000);
-
-    spi_write_blocking(SPI_PORT, image2, START_IMAGE_SIZE);
-    sleep_ms(3000);
-
-    spi_write_blocking(SPI_PORT, image3, START_IMAGE_SIZE);
+    spi_write_blocking(SPI_PORT, logo, START_IMAGE_SIZE);
     sleep_ms(3000);
 
     gc9a01_clear();
