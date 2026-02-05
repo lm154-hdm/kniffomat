@@ -78,7 +78,7 @@ Connect one side to the GPIO and the other to **GND**.
 
 # 4. Software Logic
 <details>
-<summary><b>Click to expand: Software Logic & System Behavior</b></summary>
+<summary><b>Click to expand</b></summary>
 The Kniffomat is structured as a state machine to handle hardware interrupts and UI transitions efficiently.
 
 ```mermaid
