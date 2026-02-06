@@ -51,7 +51,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 <details>
 <summary><b>Click to expand Component Diagram</b></summary>
 ![wiring_wokwi_prototype](assets/wiring_wokwi_prototype.png)
-</details
+</details>
 <details>
 <summary><b>Click to expand Pin Table</b></summary>
 
@@ -177,7 +177,7 @@ brew install cmake arm-none-eabi-gcc
 
 #### **2. Clone the Repository**
 ```
-git clone [https://gitlab.com/your-username/your-project.git](https://gitlab.com/your-username/your-project.git)
+git clone [https://gitlab.mi.hdm-stuttgart.de/embedded/ws25/kniffel.git)
 cd your-project
 ```
 
