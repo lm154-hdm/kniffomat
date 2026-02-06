@@ -51,9 +51,12 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 
 # 3 Case
 The case is made up of a top and a bottom part which have to be printed individually.
+
 Files for the parts are located here: 
-Top: [assets/3D-files/dice_cup_top.stl](assets/3D-files/dice_cup_top.stl)
-Bottom: [assets/3D-files/dice_cup_bottom.stl](assets/3D-files/dice_cup_bottom.stl)
+
+**Top**: [assets/3D-files/dice_cup_top.stl](assets/3D-files/dice_cup_top.stl)
+
+**Bottom**: [assets/3D-files/dice_cup_bottom.stl](assets/3D-files/dice_cup_bottom.stl)
 
 
 <details>
