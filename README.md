@@ -39,13 +39,13 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | Component | Quantity |Notes |Images |
 | :--- | :---: | :--- | :--- |
 | **Raspberry Pi Pico 2 H** | 1 | RP235x, pre-soldered headers, Micro-USB | ![Pico](https://ae-pic-a1.aliexpress-media.com/kf/Sf9432d5f1c734c47a03ddb750f0e5e03j.png_960x960.png_.avif) |
-| **LCD Display (DEBO LCD 1.28)** | 1 | Round LCD, 240x240 Pixels (GC9A01 driver) | ![Round TFT](assets/display.png)|
+| **LCD Display (DEBO LCD 1.28)** | 1 | Round LCD, 240x240 Pixels (GC9A01 driver) | ![Round TFT](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_LCD_1_28_02.jpg?type=Product&)|
 | **Accelerometer (MPU6050)** | 1 | 3-axis motion sensor | ![Accelerometer](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_SENS_3AXIS_01.jpg?type=Product&) |
-| **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://media.highlight-led.de/products/images/55267.jpg) |
-| **Breadboard** | 1 | For solderless prototyping ||
+| **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQenwgsxCy9a11NQSyliUaer1dOdRtxpSqwfA&s) |
+| **Breadboard** | 1 | For solderless prototyping |![Breadboard](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA8f9HU15LleyoqocngFBz0v0PMCQ_wNuNuA&s)|
 | **Jumper Wires (M/M)** | ~20 + Spares | To connect all components on the breadboard | ![Wires](https://cdn-shop.adafruit.com/970x728/758-03.jpg) |
-| **USB Cable** | 1 | USB-A to Micro USB for power and data ||
-| **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case| ![Powerbank](https://cdn.shopify.com/s/files/1/0066/6140/3900/products/powerbank_1024x1024.jpg) |
+| **USB Cable** | 1 | USB-A to Micro USB for power and data |![Cable](https://media.startech.com/cms/products/gallery_large/uusbhaub6in.main.jpg)|
+| **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case| ![Powerbank](https://m.media-amazon.com/images/I/81c5XJF5B8L._AC_UF1000,1000_QL80_.jpg) |
 
 ---
 
