@@ -237,31 +237,38 @@ supplementary images
    2. Thread the wires through the openings of the case
    3. Place the buttons into the designated spaces, 
    4. Glue the buttons into place
+
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten1](assets/Löten1.png)
+![Löten1](assets/Löten1.jpg)
 </details>
+
 ## 7.2 Components
 ### Display
    1. Solder the wires to the display side first.
    2. Thread the wires through the holes in the case.
    3. Fit the display into the opening at the top of the casing.
    4. Solder the wires to the Pico
+
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten4](assets/Löten4.png)
+![Löten4](assets/Löten4.jpg)
 </details>
+
 ### Accelerometer
    1. Solder the connections between Pico and accelerometer. 
    2. Gently push the accelerometer onto the attachment pins inside the case.
+
 ### Pico
    1. Fit the Pico into the case. 
    2. Glue the Pico into place
    3. Attach the powerbank to the Pico
+
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten6](assets/Löten6.png)
+![Löten6](assets/Löten6.jpg)
 </details>
+
 ## Notes
 - Excessive bending of wires may cause them to break.
 - The attachment pins inside the case are fragile and may break easily.
