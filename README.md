@@ -4,10 +4,12 @@ A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifica
 ---
 
 ## **Table of Contents**
-1. [Features and Controls](#1-features-and-controls)
-2. [Hardware Requirements](#2-hardware-requirements)
+1. [Features and Controls](#1-features-and-controls)  
+2. [Hardware Requirements](#2-hardware-requirements)  
 3. [Case](#3-case)
+
 4. [Wiring](#4-wiring)
+
 5. [Software Logic](#5-software-logic)
 6. [Installation and Flashing](#6-installation-and-flashing)  
    6.1 [Getting the Firmware](#61-getting-the-firmware)
@@ -15,7 +17,6 @@ A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifica
     * [Option 2: Build Natively](#option-2-build-natively)  
    
    6.2 [Installing the Firmware](#62-installing-the-firmware)  
-
 7. [Assembly](#7-assembly)  
    7.1 [Buttons](#71-buttons)  
    7.2 [Components](#72-buttons)  
