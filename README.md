@@ -66,12 +66,12 @@ printing instructions
 
 | LCD Pin | Pico GPIO | Physical Pin | Function |
 | :--- | :--- | :--- | :--- |
-| **DIN (MOSI)** | **GP11** | Pin 15 | SPI TX |
+| **DIN** | **GP11** | Pin 15 | SPI TX |
 | **CLK** | **GP10** | Pin 14 | SPI Clock |
 | **CS** | **GP13** | Pin 17 | Chip Select |
 | **DC** | **GP14** | Pin 19 | Data/Command |
 | **RST** | **GP15** | Pin 20 | Reset |
-| **MISO** | **GP12** | Pin 16 | (Unused by LCD) |
+| **BL** | **GP12** | Pin 16 | Backlight |
 
 ### **Accelerometer (I2C)**
 
@@ -94,6 +94,7 @@ Connect one side to the GPIO and the other to **GND**.
 | **Button 6** | **GP21** | Pin 27 |
 
 </details>
+
 ---
 
 # 5. Software Logic
