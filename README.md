@@ -44,7 +44,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 # 3 Case
 file location
 printing instructions
-![print_image](assets/print_image.png)
+![print_image](assets/print_image.jpg)
 ---
 
 # 4. Wiring
