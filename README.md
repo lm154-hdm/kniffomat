@@ -44,6 +44,8 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 # 3. Wiring
 ### **Display (SPI)**
 
+![wiring_diagram](assets/wiring_diagram.png)
+![wiring_wokwi_prototype](assets/wiring_wokwi_prototype.png)
 <details>
 <summary><b>Click to expand</b></summary>
 
