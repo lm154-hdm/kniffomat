@@ -232,6 +232,8 @@ If it **stays mounted**, your UF2 is invalid (wrong board, corrupted build, etc.
 ### **3. Run**
 The Pico will automatically reboot and start the Kniffomat!
 
+---
+
 # 7. Assembly
 supplementary images
 ## 7.1 Buttons
