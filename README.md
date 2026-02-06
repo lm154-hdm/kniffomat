@@ -1,5 +1,5 @@
 # **Kniffomat 🎲**
-A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifically optimized for games like Kniffel.
+A tool for replacing traditional dice, specifically optimized for games like Kniffel.
 
 ---
 
