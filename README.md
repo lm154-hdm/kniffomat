@@ -54,10 +54,9 @@ The case is made up of a top and a bottom part which have to be printed individu
 
 Files for the parts are located here: 
 
-**Top**: [assets/3D-files/dice_cup_top.stl](assets/3D-files/dice_cup_top.stl)
+**[TOP](assets/3D-files/dice_cup_top.stl)**
 
-**Bottom**: [assets/3D-files/dice_cup_bottom.stl](assets/3D-files/dice_cup_bottom.stl)
-
+**[BOTTOM](assets/3D-files/dice_cup_bottom.stl)**
 
 <details>
 <summary><b>Click to expand image of 3D-Print</b></summary>
