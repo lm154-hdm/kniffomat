@@ -20,10 +20,10 @@ A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifica
 # 1. Features and Controls
 The Kniffomat replaces physical dice with a travel-friendly device. Instead of throwing dice, you shake the cup to roll and use physical buttons to lock your results.
 
-**Locking**: After a roll, press the button corresponding to a die to "lock" it. Locked dice will not change during the next roll
-**Quick Unlock**: Perform a long press on any of the 6 buttons to instantly unlock all dice.
-**Session Setup**: When the device starts, all dice icons blink. During this phase, you can toggle each die "On" or "Off" for the current session by pressing its button.
-**Rolling the Dice**: Trigger a roll by shaking the device.
+**Locking**: After a roll, press the button corresponding to a die to "lock" it. Locked dice will not change during the next roll  
+**Quick Unlock**: Perform a long press on any of the 6 buttons to instantly unlock all dice.  
+**Session Setup**: When the device starts, all dice icons blink. During this phase, you can toggle each die "On" or "Off" for the current  session by pressing its button.  
+**Rolling the Dice**: Trigger a roll by shaking the device.  
 
 ---
 
@@ -45,7 +45,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 ### **Display (SPI)**
 
 <details>
-<summary><b>Click to expand</b></summary>
+<summary><b>Click to expand Pin Table</b></summary>
 
 | LCD Pin | Pico GPIO | Physical Pin | Function |
 | :--- | :--- | :--- | :--- |
