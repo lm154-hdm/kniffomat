@@ -40,8 +40,12 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | **Powerbank** | 1 | Any standard 5V USB power supply |
 
 ---
+# 3 Case
+file location
+printing instructions
+---
 
-# 3. Wiring
+# 4. Wiring
 ### **Display (SPI)**
 
 <details>
@@ -87,7 +91,7 @@ Connect one side to the GPIO and the other to **GND**.
 </details>
 ---
 
-# 4. Software Logic
+# 5. Software Logic
 <details>
 <summary><b>Click to expand</b></summary>
 The Kniffomat is structured as a state machine to handle hardware interrupts and UI transitions efficiently.
@@ -124,11 +128,11 @@ graph TD
 
 ---
 
-# 5. Installation and Flashing
+# 6. Installation and Flashing
 
 ---
 
-## 5.1 Getting the Firmware
+## 6.1 Getting the Firmware
 
 You can get the firmware for your Pico in one of two ways:
 1. **[GitLab Pipeline](#option-1-download-from-gitlab-recommended)**: Let GitLab build it for you and download the result.
@@ -196,7 +200,7 @@ make
 
 ---
 
-## 5.2 Installing the Firmware
+## 6.2 Installing the Firmware
 ### **1. Enter Bootloader Mode**
 
 1. Unplug the Pico
@@ -220,3 +224,8 @@ If it **stays mounted**, your UF2 is invalid (wrong board, corrupted build, etc.
 
 ### **3. Run**
 The Pico will automatically reboot and start the Kniffomat!
+
+# 7. Assembly
+Step by Step instructions
+supplementary images
+
