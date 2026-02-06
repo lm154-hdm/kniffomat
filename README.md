@@ -44,6 +44,8 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 # 3. Wiring
 ### **Display (SPI)**
 
+<details>
+<summary><b>Click to expand</b></summary>
 
 | LCD Pin | Pico GPIO | Physical Pin | Function |
 | :--- | :--- | :--- | :--- |
@@ -74,6 +76,7 @@ Connect one side to the GPIO and the other to **GND**.
 | **Button 5** | **GP20** | Pin 26 |
 | **Button 6** | **GP21** | Pin 27 |
 
+</details>
 ---
 
 # 4. Software Logic
