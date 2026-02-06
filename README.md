@@ -36,9 +36,9 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | **Accelerometer (MPU6050)** | 1 | 3-axis motion sensor |
 | **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)|
 | **Breadboard** | 1 | For solderless prototyping |
-| **Jumper Wires (M/M)** | 1 Set | To connect all components on the breadboard |
-| **USB Cable** | 1 | Micro USB for power and data |
-| **Powerbank** | 1 | Any standard 5V USB power supply |
+| **Jumper Wires (M/M)** | ~20 + Spares | To connect all components on the breadboard |
+| **USB Cable** | 1 | USB-A to Micro USB for power and data |
+| **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case|
 
 ---
 # 3 Case
