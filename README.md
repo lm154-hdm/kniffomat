@@ -119,18 +119,17 @@ graph TD
 ```
 
 #### **1. Boot & Setup**
-* **Initialization**: On power-up, the splash screen is displayed while the system calibrates the **MPU6050** accelerometer and mounts the **GC9A01** display driver.
 * **Dice Configuration**: The system enters a selection state where dice icons blink. Physical buttons toggle the number of active dice (1–6). This configuration persists for the remainder of the session.
 
 #### **2. The "Roll" Mechanism**
-* **Shake Detection**: The accelerometer is polled for G-force spikes. When a specific threshold is crossed, the system state transitions from `IDLE` to `ROLL`.
-* **Pseudo-Randomness**: Results are calculated using a Linear Congruential Generator, seeded via the system timer at the exact moment of the first shake.
-* **Visual Feedback**: A "glitch" frame sequence plays on the LCD to provide an aesthetic "rolling" effect during the calculation.
+* **Shake Detection**: The accelerometer detects by x and y-axis changes. When a specific threshold is crossed, the system state transitions from `IDLE` to `ROLL`.
+* **Pseudo-Randomness**: Results are calculated using a Linear Congruential Generator. It uses a seed generated using the system timer at the moment of the first shake.
+* **Visual Feedback**: A visual rolling effect is simulated by the dice blinking 2 times before showing the result.
 
 #### **3. Gameplay & Input**
-* **Dice Locking**: In the result state, buttons 1–6 function as toggles. Locking a die flags it to be skipped by the randomizer in the next roll.
-* **Lock UI**: Locked dice are redrawn with a color-inverted background for high-contrast visibility.
-* **Global Clear**: A long-press (>600ms) on any of the buttons resets all lock flags to `false`, allowing for a fresh throw.
+* **Dice Locking**: In the result state, buttons 1–6 act as toggles. Locking a die flags it to be skipped by the randomizer in the next roll.
+* **Lock UI**: Locked dice are highlighted with a red background for high-contrast visibility.
+* **Global Clear**: A long-press (>600ms) on any of the buttons unlocks all dice, allowing for a fresh throw.
 
 </details>
 
