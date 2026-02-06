@@ -41,6 +41,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case|
 
 ---
+
 # 3 Case
 file location
 printing instructions
@@ -48,6 +49,7 @@ printing instructions
 <summary><b>Click to expand image of 3D-Print</b></summary>
 ![print_image](assets/print_image.png)
 </details>
+
 ---
 
 # 4. Wiring
