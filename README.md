@@ -177,7 +177,7 @@ brew install cmake arm-none-eabi-gcc
 
 #### **2. Clone the Repository**
 ```
-git clone [https://gitlab.mi.hdm-stuttgart.de/embedded/ws25/kniffel.git)
+git clone https://gitlab.mi.hdm-stuttgart.de/embedded/ws25/kniffel.git
 cd your-project
 ```
 
