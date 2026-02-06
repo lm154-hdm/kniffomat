@@ -46,7 +46,7 @@ file location
 printing instructions
 <details>
 <summary><b>Click to expand image of 3D-Print</b></summary>
-![print_image](assets/print_image.jpg)
+![print_image](assets/print_image.png)
 </details>
 ---
 
