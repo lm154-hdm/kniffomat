@@ -16,8 +16,11 @@ A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifica
    
    6.2 [Installing the Firmware](#62-installing-the-firmware)
 7. [Assembly](#7-assembly)
+
    7.1 [Buttons](#71-buttons)
+
    7.2 [Components](#72-buttons)
+   
    7.3 [Notes](#73-notes)
    
 ---
