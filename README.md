@@ -16,6 +16,9 @@ A compact, Raspberry Pi Pico-powered replacement for traditional dice, specifica
 
    6.2 [Installing the Firmware](#62-installing-the-firmware)
 7. [Assembly](#7-assembly)
+   7.1 [Buttons](#71-buttons)
+   7.2 [Components](#72-buttons)
+   7.3 [Notes](#73-notes)
 ---
 
 # 1. Features and Controls
@@ -273,6 +276,6 @@ supplementary images
 ![Löten6](assets/Löten6.jpg)
 </details>
 
-## Notes
+## 7.3 Notes
 - Excessive bending of wires may cause them to break.
 - The attachment pins inside the case are fragile and may break easily.
