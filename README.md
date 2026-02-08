@@ -60,7 +60,7 @@ Files for the parts are located here:
 
 <details>
 <summary><b>Click to expand image of 3D-Print</b></summary>
-![print_image](assets/print_image.png)
+![print_image](assets/print_image.png){width=50%}
 </details>
 
 ---
@@ -70,7 +70,7 @@ Files for the parts are located here:
 
 <details>
 <summary><b>Click to expand Wiring Diagram</b></summary>
-![wiring_diagram](assets/wiring_diagram.png)
+![wiring_diagram](assets/wiring_diagram.png){width=50%}
 </details>
 <details>
 <summary><b>Click to expand Component Diagram</b></summary>
@@ -289,3 +289,5 @@ supplementary images
 ## 7.3 Notes
 - Excessive bending of wires may cause them to break.
 - The attachment pins inside the case are fragile and may break easily.
+
+Now your Kniffomat should be ready, try it out by shaking it a few times. The fun has just begun!
