@@ -38,7 +38,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 # 2. Hardware Requirements
 | Component | Quantity |Notes |Images |
 | :--- | :---: | :--- | :--- |
-| **Raspberry Pi Pico 2 H** | 1 | RP235x, pre-soldered headers, Micro-USB | ![Pico](https://ae-pic-a1.aliexpress-media.com/kf/Sf9432d5f1c734c47a03ddb750f0e5e03j.png_960x960.png_.avif){width=562 height=600} |
+| **Raspberry Pi Pico 2 H** | 1 | RP235x, pre-soldered headers, Micro-USB | ![Pico](https://nerikoelectronics.com/storage/app/public/product/2024-05-18-6648b464ec858.webp) |
 | **LCD Display (DEBO LCD 1.28)** | 1 | Round LCD, 240x240 Pixels (GC9A01 driver) | ![Round TFT](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_LCD_1_28_02.jpg?type=Product&)|
 | **Accelerometer (MPU6050)** | 1 | 3-axis motion sensor | ![Accelerometer](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_SENS_3AXIS_01.jpg?type=Product&) |
 | **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQenwgsxCy9a11NQSyliUaer1dOdRtxpSqwfA&s) |
