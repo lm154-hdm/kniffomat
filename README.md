@@ -44,7 +44,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQenwgsxCy9a11NQSyliUaer1dOdRtxpSqwfA&s) |
 | **Breadboard** | 1 | For solderless prototyping |![Breadboard](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA8f9HU15LleyoqocngFBz0v0PMCQ_wNuNuA&s)|
 | **Jumper Wires (M/M)** | ~20 + Spares | To connect all components on the breadboard | ![Wires](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRODv3TnCu7QtP081t7WvoMQfiriMmDChwkMQ&s) |
-| **USB Cable** | 1 | USB-A to Micro USB for power and data |![Cable](https://www.kiwi-electronics.com/image/cache/catalog/product/5xp3271y/KW-100_0-700x525w.jpg){width=562 height=600}|
+| **USB Cable** | 1 | USB-A to Micro USB for power and data |![Cable](https://assets.tripplite.com/large-image/u050006gymax-front-l.jpg)|
 | **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case| ![Powerbank](https://m.media-amazon.com/images/I/51v2STCQRbL._AC_UF1000,1000_QL80_.jpg){width=50%} |
 
 ---
