@@ -1,5 +1,5 @@
 # **Kniffomat 🎲**
-So you want to build a Kniffomat, a dice rolling automata for all your dice needs. The Kniffomat supports up to 6 dice and can be used to play games like Kniffel, Super-Six and Farkle. This Readme shows you which parts you need and what steps to follow to build your own Kniffomat
+So you want to build a Kniffomat, a dice rolling automata for all your dice needs. The Kniffomat supports up to 6 dice and can be used to play games like Kniffel, Super-Six and Farkle. This Readme shows you which parts you need and what steps to follow to build your own Kniffomat.
 
 ---
 
@@ -36,6 +36,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 ---
 
 # 2. Hardware Requirements
+You need to buy the following Components. Its important to buy the Pico 2 H as the pin order and firmware would be different for another model.
 | Component | Quantity |Notes |Images |
 | :--- | :---: | :--- | :--- |
 | **Raspberry Pi Pico 2 H** | 1 | RP235x, pre-soldered headers, Micro-USB | ![Pico](https://ae-pic-a1.aliexpress-media.com/kf/Sf9432d5f1c734c47a03ddb750f0e5e03j.png_960x960.png_.avif){width=50%} |
@@ -58,6 +59,8 @@ Files for the parts are located here:
 
 **[Bottom](assets/3D-files/dice_cup_bottom.stl)**
 
+Use a 3D Printer to print these with your preferred settings.
+
 <details>
 <summary><b>Click to expand image of 3D-Print</b></summary>
 ![print_image](assets/print_image.png){width=50%}
@@ -66,6 +69,7 @@ Files for the parts are located here:
 ---
 
 # 4. Wiring
+This step explains how all parts are connected. You should use a breadboard to prototype all functionality first before soldering everything together.
 ### **Display (SPI)**
 
 <details>
