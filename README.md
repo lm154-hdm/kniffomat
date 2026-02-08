@@ -39,7 +39,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | Component | Quantity |Notes |Images |
 | :--- | :---: | :--- | :--- |
 | **Raspberry Pi Pico 2 H** | 1 | RP235x, pre-soldered headers, Micro-USB | ![Pico](https://ae-pic-a1.aliexpress-media.com/kf/Sf9432d5f1c734c47a03ddb750f0e5e03j.png_960x960.png_.avif){width=50%} |
-| **LCD Display (DEBO LCD 1.28)** | 1 | Round LCD, 240x240 Pixels (GC9A01 driver) | ![Round TFT](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_LCD_1_28_02.jpg?type=Product&)|
+| **LCD Display (DEBO LCD 1.28)** | 1 | Round LCD, 240x240 Pixels (GC9A01 driver) | ![Round TFT](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_LCD_1_28_02.jpg?type=Product&){width=50%}|
 | **Accelerometer (MPU6050)** | 1 | 3-axis motion sensor | ![Accelerometer](https://cdn-reichelt.de/bilder/web/artikel_ws/A300%2FDEBO_SENS_3AXIS_01.jpg?type=Product&) |
 | **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQenwgsxCy9a11NQSyliUaer1dOdRtxpSqwfA&s) |
 | **Breadboard** | 1 | For solderless prototyping |![Breadboard](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA8f9HU15LleyoqocngFBz0v0PMCQ_wNuNuA&s)|
@@ -257,7 +257,7 @@ supplementary images
 
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten1](assets/Löten1.jpg)
+![Löten1](assets/Löten1.jpg){width=50%}
 </details>
 
 ## 7.2 Components
@@ -269,7 +269,7 @@ supplementary images
 
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten4](assets/Löten4.jpg)
+![Löten4](assets/Löten4.jpg){width=50%}
 </details>
 
 ### Accelerometer
@@ -283,7 +283,7 @@ supplementary images
 
 <details>
 <summary><b>Click to expand</b></summary>
-![Löten6](assets/Löten6.jpg)
+![Löten6](assets/Löten6.jpg){width=50%}
 </details>
 
 ## 7.3 Notes
