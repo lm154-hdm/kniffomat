@@ -1,5 +1,5 @@
 # **Kniffomat 🎲**
-A tool for replacing traditional dice, specifically optimized for games like Kniffel.
+So you want to build a Kniffomat, a dice rolling automata for all your dice needs. The Kniffomat supports up to 6 dice and can be used to play games like Kniffel, Super-Six and Farkle. This Readme shows you which parts you need and what steps to follow to build your own Kniffomat
 
 ---
 
@@ -44,7 +44,7 @@ The Kniffomat replaces physical dice with a travel-friendly device. Instead of t
 | **Push-Buttons** | 6 |Standard 6x6mm tactile switches (e.g. OMR B3F-1002)| ![Buttons](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQenwgsxCy9a11NQSyliUaer1dOdRtxpSqwfA&s) |
 | **Breadboard** | 1 | For solderless prototyping |![Breadboard](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSA8f9HU15LleyoqocngFBz0v0PMCQ_wNuNuA&s)|
 | **Jumper Wires (M/M)** | ~20 + Spares | To connect all components on the breadboard | ![Wires](https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRODv3TnCu7QtP081t7WvoMQfiriMmDChwkMQ&s) |
-| **USB Cable** | 1 | USB-A to Micro USB for power and data |![Cable](https://assets.tripplite.com/large-image/u050006gymax-front-l.jpg)|
+| **USB Cable** | 1 | USB-A to Micro USB for power and data |![Cable](https://assets.tripplite.com/large-image/u050006gymax-front-l.jpg){width=50%}|
 | **Powerbank** | 1 | Any standard cylindrical 5V USB power supply that fits the case| ![Powerbank](https://m.media-amazon.com/images/I/51v2STCQRbL._AC_UF1000,1000_QL80_.jpg){width=50%} |
 
 ---
