@@ -9,8 +9,6 @@
 
 // Initialize accelerometer, including I2C explanation
 void accelerometer_init(int accelerometer_address, int accelerometer_sda, int accelerometer_scl) {
-    int i = 0;
-
     // Initialize Pico's onboard LED
     gpio_init(25);
     gpio_set_dir(25, GPIO_OUT);
@@ -30,7 +28,7 @@ void accelerometer_init(int accelerometer_address, int accelerometer_sda, int ac
     uint8_t chip_id[1];
 
     // Example explanation for I2C bus communication for the following 2 lines:
-    // Write register address, arguments: 
+    // Write register address, arguments:
     //(first i2c connection, address, pointer to data, length of data, keep control of bus)
     i2c_write_blocking(ACCELEROMETER_BUS_PORT, accelerometer_address, &who_am_i_reg, 1, true);
 
@@ -46,11 +44,13 @@ void accelerometer_init(int accelerometer_address, int accelerometer_sda, int ac
         // Blink to signalize failed connection
         gpio_put(25, 0);
         printf("Failed to detect MPU6050");
-        while(i < 6) {
+        int i = 0;
+        while (i < 6) {
             gpio_put(25, 1);
             sleep_ms(300);
             gpio_put(25, 0);
             sleep_ms(300);
+            i++;
         }
     }
 
@@ -64,7 +64,7 @@ void accelerometer_init(int accelerometer_address, int accelerometer_sda, int ac
     // Reset. disable sleep, cycle & temp sensor. Use x axes gyro for clock source
     data[0] = 0x6B;
     data[1] = 0x28;  // 10001001 /aktuell 0x28 = 40 = 00101000
-    //data[1] = 0b10001001;  // testen
+    // data[1] = 0b10001001;  // testen
     i2c_write_blocking(ACCELEROMETER_BUS_PORT, accelerometer_address, data, 2, true);
 
     // Power management, register 108 [6C], bits function:

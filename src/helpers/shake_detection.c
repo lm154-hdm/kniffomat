@@ -18,7 +18,6 @@ bool was_shaken(int accelerometer_address, int accelerometer_sda, int accelerome
     // Starting register number for accelerometer xyz data
     uint8_t accel_data_register = 0x3B;
 
-
     // Check connection, if Chip ID can't be verified -> connection error, return false
     uint8_t who_am_i_reg = 0x75;
     uint8_t chip_id[1];
