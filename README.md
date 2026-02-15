@@ -1,6 +1,9 @@
 # **Kniffomat 🎲**
 So you want to build a Kniffomat, a dice rolling automata for all your dice needs. The Kniffomat supports up to 6 dice and can be used to play games like Kniffel, Super-Six and Farkle. This Readme shows you which parts you need and what steps to follow to build your own Kniffomat.
 
+## Trailer
+[![Alt text](assets/Trailer_Thumbnail.jpg)](https://youtu.be/IVZKuIQWwR0 "Kniffomat")  
+
 ---
 
 ## **Table of Contents**
